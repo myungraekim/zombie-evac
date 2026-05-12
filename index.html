@@ -1,0 +1,1642 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZOMBIE EVAC — 3D Zombie Survival Strategy</title>
+<meta name="description" content="좀비가 사방에서 침입한다. 한정된 자원으로 시민을 구출하라. 재난 전문가가 만든 3D 전략 게임.">
+<meta property="og:title" content="ZOMBIE EVAC — 3D Zombie Survival">
+<meta property="og:description" content="좀비 대피 전략 게임. 재난안전 박사가 AI로 만들었습니다. 무료 플레이!">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="ZOMBIE EVAC — 3D Zombie Survival Strategy Game">
+<meta name="twitter:description" content="A disaster evacuation expert built this zombie strategy game with AI. Free to play in your browser!">
+
+<!-- ════ GOOGLE ANALYTICS ════
+  👉 발급 방법:
+     1. analytics.google.com 접속
+     2. 관리 → 속성 만들기 → 웹 스트림
+     3. 측정 ID (G-XXXXXXXXXX) 복사
+     4. 아래 주석 해제 후 ID 교체
+-->
+<!--
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-XXXXXXXXXX');
+  // 게임 이벤트 트래킹 예시:
+  // gtag('event', 'wave_clear', { wave: 1, score: 100 });
+  // gtag('event', 'game_over', { wave: 1, dead: 10 });
+</script>
+-->
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+KR:wght@400;600;700&display=swap');
+
+:root {
+  --bg: #07090f;
+  --panel: rgba(7,9,15,0.96);
+  --border: rgba(57,255,20,0.2);
+  --green: #39ff14;
+  --red: #ff3333;
+  --blue: #38bdf8;
+  --yellow: #fbbf24;
+  --purple: #a78bfa;
+  --orange: #f97316;
+  --text: #dde6f0;
+  --muted: rgba(221,230,240,0.45);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:var(--bg); color:var(--text); font-family:'Noto Sans KR',sans-serif; overflow:hidden; height:100vh; }
+canvas { position:fixed; inset:0; z-index:0; display:block; width:100%; height:100%; }
+
+/* ─── TOP BAR ─── */
+#topbar {
+  position:fixed; top:0; left:0; right:0; z-index:30;
+  height:56px; display:flex; align-items:center; justify-content:space-between;
+  padding:0 20px; background:var(--panel);
+  border-bottom:1px solid var(--border); backdrop-filter:blur(12px);
+}
+.logo { font-family:'Bebas Neue',sans-serif; font-size:24px; letter-spacing:5px; color:var(--green); text-shadow:0 0 16px rgba(57,255,20,.6); }
+.logo em { color:#fff; font-style:normal; }
+.top-stats { display:flex; gap:20px; align-items:center; }
+.stat { display:flex; flex-direction:column; align-items:center; gap:1px; }
+.stat-val { font-family:'Bebas Neue',sans-serif; font-size:22px; line-height:1; }
+.stat-lbl { font-size:9px; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); }
+.wave-badge {
+  font-family:'Bebas Neue',sans-serif; font-size:13px; letter-spacing:3px;
+  padding:4px 14px; border-radius:3px; background:var(--red); animation:pulse .9s infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.55} }
+.diff-badge {
+  font-size:11px; letter-spacing:2px; padding:3px 10px; border-radius:3px;
+  font-family:'Bebas Neue',sans-serif;
+}
+.diff-1{background:rgba(57,255,20,.15);color:var(--green);border:1px solid rgba(57,255,20,.3)}
+.diff-2{background:rgba(251,191,36,.15);color:var(--yellow);border:1px solid rgba(251,191,36,.3)}
+.diff-3{background:rgba(249,115,22,.15);color:var(--orange);border:1px solid rgba(249,115,22,.3)}
+.diff-4{background:rgba(255,51,51,.18);color:var(--red);border:1px solid rgba(255,51,51,.35)}
+.diff-5{background:rgba(167,139,250,.18);color:var(--purple);border:1px solid rgba(167,139,250,.35)}
+
+/* ─── BOTTOM TOOLBAR ─── */
+#toolbar {
+  position:fixed; bottom:0; left:0; right:0; z-index:30;
+  height:68px; display:flex; align-items:center; gap:10px;
+  padding:0 16px; background:var(--panel);
+  border-top:1px solid var(--border); backdrop-filter:blur(12px);
+}
+
+.tool {
+  display:flex; flex-direction:column; align-items:center; gap:2px;
+  background:rgba(255,255,255,.04); border:1.5px solid rgba(255,255,255,.1);
+  color:var(--text); padding:7px 13px; border-radius:8px;
+  cursor:pointer; min-width:72px; transition:.13s; user-select:none;
+  font-family:'Noto Sans KR',sans-serif;
+}
+.tool:hover { background:rgba(255,255,255,.09); border-color:rgba(255,255,255,.22); }
+.tool.t-shelter.active { border-color:var(--yellow); background:rgba(251,191,36,.12); box-shadow:0 0 12px rgba(251,191,36,.2); }
+.tool.t-barrier.active { border-color:var(--orange); background:rgba(249,115,22,.12); }
+.tool.t-rescue.active  { border-color:var(--purple);  background:rgba(167,139,250,.12); }
+.tool.t-bomb.active    { border-color:var(--red);     background:rgba(255,51,51,.12); }
+.tool-icon { font-size:18px; line-height:1; }
+.tool-name { font-size:10px; font-weight:600; }
+.tool-cost { font-size:9px; color:var(--muted); }
+
+.ap-section { flex:1; min-width:100px; max-width:160px; }
+.ap-label { font-size:9px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin-bottom:4px; }
+.ap-track { background:rgba(255,255,255,.07); border-radius:4px; height:6px; overflow:hidden; }
+.ap-fill { height:100%; background:linear-gradient(90deg,var(--green),#00e5ff); border-radius:4px; transition:width .3s; }
+.ap-num { font-size:11px; margin-top:3px; text-align:right; color:var(--muted); }
+
+.action-btn {
+  padding:0 20px; height:44px; border-radius:7px; cursor:pointer;
+  font-family:'Bebas Neue',sans-serif; font-size:16px; letter-spacing:3px; border:none; transition:.13s;
+  white-space:nowrap;
+}
+.btn-start { background:var(--green); color:#000; }
+.btn-start:hover { box-shadow:0 0 18px rgba(57,255,20,.5); transform:scale(1.03); }
+.btn-start:disabled { background:#2a3a2a; color:#3a4a3a; cursor:default; transform:none; box-shadow:none; }
+.btn-next  { background:var(--yellow); color:#000; }
+.btn-next:hover  { box-shadow:0 0 18px rgba(251,191,36,.4); transform:scale(1.03); }
+
+/* ─── LOG ─── */
+#log {
+  position:fixed; bottom:76px; left:14px; z-index:31;
+  display:flex; flex-direction:column; gap:3px; width:260px; pointer-events:none;
+}
+.log-line {
+  background:rgba(7,9,15,.9); border-left:3px solid rgba(255,255,255,.15);
+  padding:4px 8px; font-size:11px; border-radius:0 4px 4px 0;
+  animation:slideIn .18s ease; opacity:.92; line-height:1.4;
+}
+.log-line.good { border-color:var(--green); color:var(--green); }
+.log-line.warn { border-color:var(--red);   color:#fca5a5; }
+.log-line.info { border-color:var(--blue);  color:var(--blue); }
+@keyframes slideIn { from{opacity:0;transform:translateX(-5px)} to{opacity:.92;transform:translateX(0)} }
+
+/* ─── OVERLAYS ─── */
+.overlay {
+  position:fixed; inset:0; z-index:50;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  background:rgba(7,9,15,.93); backdrop-filter:blur(10px);
+}
+.ov-title {
+  font-family:'Bebas Neue',sans-serif; font-size:60px; letter-spacing:7px;
+  line-height:1; text-align:center; margin-bottom:6px;
+}
+.ov-title.green { color:var(--green); text-shadow:0 0 32px rgba(57,255,20,.7); }
+.ov-title.red   { color:var(--red);   text-shadow:0 0 32px rgba(255,51,51,.7); }
+.ov-title.gold  { color:var(--yellow);text-shadow:0 0 32px rgba(251,191,36,.7); }
+
+.ov-sub  { color:var(--muted); font-size:14px; text-align:center; line-height:1.7; max-width:420px; margin-bottom:6px; }
+.ov-score { font-family:'Bebas Neue',sans-serif; font-size:24px; color:var(--yellow); letter-spacing:3px; margin-bottom:20px; }
+
+.ov-btn {
+  padding:12px 34px; border-radius:7px; cursor:pointer;
+  font-family:'Bebas Neue',sans-serif; font-size:19px; letter-spacing:4px; border:none; transition:.13s; margin:5px;
+}
+.ov-btn.green { background:var(--green); color:#000; }
+.ov-btn.green:hover { transform:scale(1.05); box-shadow:0 0 24px rgba(57,255,20,.5); }
+.ov-btn.red   { background:var(--red);   color:#fff; }
+.ov-btn.red:hover { transform:scale(1.05); }
+.ov-btn.gold  { background:var(--yellow); color:#000; }
+.ov-btn.gold:hover { transform:scale(1.05); box-shadow:0 0 24px rgba(251,191,36,.4); }
+
+/* Tutorial cards */
+.tut-cards { display:flex; gap:10px; flex-wrap:wrap; justify-content:center; max-width:600px; margin:14px 0 16px; }
+.tcard {
+  background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.1);
+  border-radius:10px; padding:12px 14px; min-width:110px; text-align:center;
+}
+.tcard-icon { font-size:24px; margin-bottom:5px; }
+.tcard-name { font-size:12px; font-weight:700; margin-bottom:3px; }
+.tcard-desc { font-size:10px; color:var(--muted); line-height:1.5; }
+.tcard-ap   { font-size:10px; color:var(--yellow); font-weight:700; margin-top:4px; }
+
+/* Steps */
+.tut-steps { display:flex; gap:6px; flex-wrap:wrap; justify-content:center; margin-bottom:18px; max-width:520px; }
+.tstep {
+  background:rgba(57,255,20,.07); border:1px solid rgba(57,255,20,.18);
+  border-radius:20px; padding:4px 12px; font-size:11px; color:var(--green);
+}
+
+/* Wave info panel */
+.wave-info {
+  background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.1);
+  border-radius:10px; padding:14px 20px; text-align:center; margin-bottom:16px;
+}
+.wave-info-title { font-family:'Bebas Neue',sans-serif; font-size:18px; letter-spacing:3px; color:var(--yellow); margin-bottom:8px; }
+.wave-info-row { display:flex; gap:20px; justify-content:center; flex-wrap:wrap; }
+.wave-info-item { font-size:12px; }
+.wave-info-item span { color:var(--red); font-weight:700; }
+
+/* ── NAME ENTRY SCREEN (피터 레벨스 스타일) ── */
+#nameScreen {
+  position:fixed; inset:0; z-index:60;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  background:rgba(7,9,15,0.96); backdrop-filter:blur(12px);
+}
+.ns-logo {
+  font-family:'Bebas Neue',sans-serif; font-size:72px; letter-spacing:8px;
+  color:var(--green); text-shadow:0 0 40px rgba(57,255,20,.7);
+  line-height:1; margin-bottom:4px; text-align:center;
+}
+.ns-logo em { color:#fff; font-style:normal; }
+.ns-by {
+  font-size:13px; color:rgba(221,230,240,.4); letter-spacing:2px;
+  margin-bottom:6px; text-align:center;
+}
+.ns-by a { color:rgba(57,255,20,.6); text-decoration:none; }
+.ns-by a:hover { color:var(--green); }
+.ns-desc {
+  font-size:18px; color:var(--text); text-align:center;
+  max-width:400px; line-height:1.65; margin-bottom:28px;
+  font-weight:600;
+}
+.ns-desc em { color:var(--green); font-style:normal; }
+.ns-input {
+  width:320px; max-width:90vw; padding:14px 18px;
+  font-size:16px; border-radius:8px;
+  border:2px solid rgba(255,255,255,.15);
+  background:rgba(255,255,255,.08); color:#fff;
+  outline:none; text-align:center; letter-spacing:1px;
+  transition:.2s; margin-bottom:12px;
+  font-family:'Noto Sans KR',sans-serif;
+}
+.ns-input::placeholder { color:rgba(255,255,255,.35); }
+.ns-input:focus { border-color:var(--green); background:rgba(57,255,20,.07); }
+.ns-join {
+  width:320px; max-width:90vw; padding:15px;
+  font-family:'Bebas Neue',sans-serif; font-size:22px; letter-spacing:4px;
+  background:var(--green); color:#000; border:none; border-radius:8px;
+  cursor:pointer; transition:.15s; margin-bottom:22px;
+}
+.ns-join:hover { transform:scale(1.03); box-shadow:0 0 28px rgba(57,255,20,.5); }
+.ns-join:active { transform:scale(.98); }
+.ns-ad {
+  font-size:12px; color:rgba(221,230,240,.45); text-align:center;
+  margin-bottom:20px; line-height:1.6;
+}
+.ns-ad a { color:var(--yellow); text-decoration:underline; cursor:pointer; }
+.ns-links {
+  display:flex; gap:16px; font-size:12px;
+  color:rgba(221,230,240,.35);
+}
+.ns-links span { cursor:pointer; transition:.15s; }
+.ns-links span:hover { color:var(--text); }
+.ns-player {
+  position:fixed; bottom:70px; right:16px; z-index:31;
+  background:rgba(7,9,15,.88); border:1px solid rgba(57,255,20,.2);
+  border-radius:8px; padding:6px 12px; font-size:12px;
+  color:var(--green); pointer-events:none;
+  backdrop-filter:blur(6px);
+}
+
+.hidden { display:none !important; }
+</style>
+</head>
+<body>
+<canvas id="cv"></canvas>
+
+<!-- TOP BAR -->
+<div id="topbar">
+  <div class="logo">ZOMBIE <em>EVAC</em></div>
+  <div class="top-stats">
+    <div class="stat"><div class="stat-val" style="color:var(--green)" id="vSaved">0</div><div class="stat-lbl">구출</div></div>
+    <div class="stat"><div class="stat-val" style="color:var(--red)"   id="vDead">0</div><div class="stat-lbl">희생</div></div>
+    <div class="stat"><div class="stat-val" style="color:var(--blue)"  id="vAlive">0</div><div class="stat-lbl">생존자</div></div>
+    <div class="stat"><div class="stat-val" style="color:var(--red)"   id="vZom">0</div><div class="stat-lbl">좀비</div></div>
+    <div class="stat"><div class="stat-val" style="color:var(--yellow)" id="vScore">0</div><div class="stat-lbl">점수</div></div>
+    <div id="wpill" class="wave-badge">WAVE 1</div>
+    <div id="diffbadge" class="diff-badge diff-1">EASY</div>
+    <button id="lbtn" onclick="toggleLang()" style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);color:var(--text);padding:5px 12px;border-radius:4px;cursor:pointer;font-size:12px;letter-spacing:1px;transition:.15s;margin-left:8px;">🌐 EN</button>
+  </div>
+</div>
+
+<!-- TOOLBAR -->
+<div id="toolbar">
+  <button class="tool t-shelter active" id="tb0" onclick="selTool(0)">
+    <span class="tool-icon">🏠</span><span class="tool-name">대피소</span><span class="tool-cost">3AP</span>
+  </button>
+  <button class="tool t-barrier" id="tb1" onclick="selTool(1)">
+    <span class="tool-icon">🚧</span><span class="tool-name">바리케이드</span><span class="tool-cost">1AP</span>
+  </button>
+  <button class="tool t-rescue" id="tb2" onclick="selTool(2)">
+    <span class="tool-icon">🚒</span><span class="tool-name">구조대</span><span class="tool-cost">4AP</span>
+  </button>
+  <button class="tool t-bomb" id="tb3" onclick="selTool(3)">
+    <span class="tool-icon">💣</span><span class="tool-name">폭탄</span><span class="tool-cost">5AP</span>
+  </button>
+  <div class="ap-section">
+    <div class="ap-label">행동력 (AP)</div>
+    <div class="ap-track"><div class="ap-fill" id="apBar" style="width:100%"></div></div>
+    <div class="ap-num" id="apNum">10 / 10</div>
+  </div>
+  <button class="action-btn btn-start" id="btnStart" onclick="startWave()">▶ 웨이브 시작</button>
+  <button class="action-btn btn-next hidden" id="btnNext" onclick="proceedNext()">계속 →</button>
+</div>
+
+<div id="log"></div>
+
+<!-- ── NAME ENTRY SCREEN (피터 레벨스 스타일) ── -->
+<div id="nameScreen">
+  <div class="ns-logo">ZOMBIE<br><em>EVAC</em></div>
+  <div class="ns-by">
+    by <a href="https://x.com/kimmyungrae80" target="_blank">@kimmyungrae80</a>
+    &nbsp;+&nbsp;Claude&nbsp;+&nbsp;Three.JS
+  </div>
+
+  <div class="ns-desc" id="nsDesc">
+    좀비가 사방에서 침범한다.<br>
+    <em>재난 전문가</em>가 설계한 대피 전략 게임.<br>
+    설치 없이 브라우저에서 바로 플레이.
+  </div>
+
+  <!-- 이름 입력 -->
+  <input class="ns-input" id="nameInput" type="text"
+    placeholder="닉네임을 입력하세요..." maxlength="16"
+    onkeydown="if(event.key==='Enter') joinGame()" />
+  <button class="ns-join" id="nsJoinBtn" onclick="joinGame()">게임 참가</button>
+
+  <!-- 광고 문구 (피터 레벨스 방식) -->
+  <div class="ns-ad" id="nsAd">
+    <a onclick="alert('광고 문의: 게임 내 3D 광고판 노출\n준비 중입니다. 트래픽 증가 후 오픈 예정.')">
+      스타트업 홍보
+    </a>
+    — 게임 내 광고판으로 수천 명에게 도달하세요
+  </div>
+
+  <!-- 하단 링크 -->
+  <div class="ns-links" id="nsLinks">
+    <span onclick="showHowTo()">게임 방법</span>
+    <span>|</span>
+    <span onclick="switchNsLang()">🌐 EN</span>
+    <span>|</span>
+    <span onclick="window.open('https://x.com/kimmyungrae80','_blank')">X (트위터)</span>
+  </div>
+</div>
+
+<!-- ── HOW TO PLAY (간략) ── -->
+<div class="overlay hidden" id="ovTut">
+  <div class="ov-title green" style="font-size:46px">HOW TO PLAY</div>
+  <div class="tut-cards" style="margin-top:16px">
+    <div class="tcard">
+      <div class="tcard-icon">🏠</div>
+      <div class="tcard-name" id="tcn0">대피소</div>
+      <div class="tcard-desc" id="tcd0">시민 목적지<br>도착하면 구출</div>
+      <div class="tcard-ap">3 AP</div>
+    </div>
+    <div class="tcard">
+      <div class="tcard-icon">🚧</div>
+      <div class="tcard-name" id="tcn1">바리케이드</div>
+      <div class="tcard-desc" id="tcd1">좀비 3턴 차단<br>경로 통제</div>
+      <div class="tcard-ap">1 AP</div>
+    </div>
+    <div class="tcard">
+      <div class="tcard-icon">🚒</div>
+      <div class="tcard-name" id="tcn2">구조대</div>
+      <div class="tcard-desc" id="tcd2">잡힌 시민 구출<br>인접 셀 효과</div>
+      <div class="tcard-ap">4 AP</div>
+    </div>
+    <div class="tcard">
+      <div class="tcard-icon">💣</div>
+      <div class="tcard-name" id="tcn3">폭탄</div>
+      <div class="tcard-desc" id="tcd3">3x3 범위 폭발<br>즉시 제거</div>
+      <div class="tcard-ap">5 AP</div>
+    </div>
+    <div class="tcard" style="border-color:rgba(255,51,51,.3)">
+      <div class="tcard-icon">🧟</div>
+      <div class="tcard-name" id="tcn4">좀비</div>
+      <div class="tcard-desc" id="tcd4">4방향 침입<br>레벨마다 강해짐</div>
+    </div>
+    <div class="tcard" style="border-color:rgba(56,189,248,.3)">
+      <div class="tcard-icon">🧑</div>
+      <div class="tcard-name" id="tcn5">시민</div>
+      <div class="tcard-desc" id="tcd5">도시 분산 배치<br>자동으로 피함</div>
+    </div>
+  </div>
+  <div class="tut-steps" style="margin-top:14px">
+    <div class="tstep" id="step1">① 도로 클릭 → 배치</div>
+    <div class="tstep" id="step2">② 웨이브 시작</div>
+    <div class="tstep" id="step3">③ 희생 10명 = 패배</div>
+    <div class="tstep" id="step4">④ 5웨이브 = 승리</div>
+    <div class="tstep" id="step5">⑤ AP 매 웨이브 충전</div>
+  </div>
+  <button class="ov-btn green" id="tutBtn" onclick="closeHowTo()">확인</button>
+</div>
+
+<!-- 플레이어 닉네임 표시 -->
+<div class="ns-player hidden" id="playerTag">👤 <span id="playerName"></span></div>
+
+<!-- ── WAVE CLEAR ── -->
+<div class="overlay hidden" id="ovClear">
+  <div class="ov-title green" id="ocTitle">WAVE 1 CLEAR!</div>
+  <div class="ov-sub" id="ocSub"></div>
+  <div class="wave-info" id="ocWaveInfo">
+    <div class="wave-info-title" id="ocNextTitle">WAVE 2 예고</div>
+    <div class="wave-info-row" id="ocNextRow"></div>
+  </div>
+  <div class="ov-score" id="ocScore"></div>
+  <button class="ov-btn green" id="ocBtn" onclick="proceedNext()">다음 웨이브 →</button>
+</div>
+
+<!-- ── VICTORY ── -->
+<div class="overlay hidden" id="ovWin">
+  <div class="ov-title gold">MISSION<br>COMPLETE!</div>
+  <div class="ov-sub" id="owSub">5웨이브를 모두 클리어했습니다!<br>도시가 살아남았습니다.</div>
+  <div class="ov-score" id="owScore"></div>
+  <div style="display:flex;gap:10px;">
+    <button class="ov-btn gold" onclick="initGame()">처음부터 다시</button>
+    <button class="ov-btn green" onclick="continueHard()">+ 하드모드 계속</button>
+  </div>
+</div>
+
+<!-- ── GAME OVER ── -->
+<div class="overlay hidden" id="ovOver">
+  <div class="ov-title red">GAME OVER</div>
+  <div class="ov-sub" id="ooSub"></div>
+  <div class="ov-score" id="ooScore"></div>
+  <div style="display:flex;gap:10px;">
+    <button class="ov-btn red" onclick="initGame()">처음부터</button>
+    <button class="ov-btn green" onclick="retrySameWave()">이 웨이브 재도전</button>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+'use strict';
+
+// ════════════════════════════════════════════
+//  LANGUAGE SYSTEM
+// ════════════════════════════════════════════
+var lang = 'ko';
+var playerName = '';
+
+// ════════════════════════════════════════════
+//  NAME ENTRY SCREEN
+// ════════════════════════════════════════════
+var NS_TEXT = {
+  ko: {
+    desc: '좀비가 사방에서 침범한다.<br><em>재난 전문가</em>가 설계한 대피 전략 게임.<br>설치 없이 브라우저에서 바로 플레이.',
+    placeholder: '닉네임을 입력하세요...',
+    join: '게임 참가',
+    adText: '— 게임 내 광고판으로 수천 명에게 도달하세요',
+    adLink: '스타트업 홍보',
+    howto: '게임 방법',
+    xlink: 'X (트위터)',
+    howtoClose: '확인'
+  },
+  en: {
+    desc: 'Zombies invade from all sides.<br>A <em>disaster expert\'s</em> evacuation strategy game.<br>No install. Play free in your browser.',
+    placeholder: 'Enter your nickname...',
+    join: 'JOIN THE GAME',
+    adText: '— reach thousands with an in-game billboard',
+    adLink: 'Promote your startup',
+    howto: 'How to play',
+    xlink: 'X (Twitter)',
+    howtoClose: 'Got it'
+  }
+};
+
+function joinGame() {
+  var input = document.getElementById('nameInput');
+  var name = input ? input.value.trim() : '';
+  if (!name) name = lang === 'ko' ? '익명의 지휘관' : 'Commander';
+  playerName = name;
+
+  // Show player tag
+  document.getElementById('playerName').textContent = name;
+  document.getElementById('playerTag').classList.remove('hidden');
+
+  // Hide name screen, start game
+  document.getElementById('nameScreen').classList.add('hidden');
+  initGame();
+}
+
+function showHowTo() {
+  document.getElementById('ovTut').classList.remove('hidden');
+}
+
+function closeHowTo() {
+  document.getElementById('ovTut').classList.add('hidden');
+}
+
+function switchNsLang() {
+  lang = lang === 'ko' ? 'en' : 'ko';
+  var t = NS_TEXT[lang];
+  var lbtn = document.getElementById('lbtn');
+  if (lbtn) lbtn.textContent = lang === 'ko' ? '🌐 EN' : '🌐 한';
+
+  // Update name screen texts
+  var desc = document.getElementById('nsDesc');
+  if (desc) desc.innerHTML = t.desc;
+  var inp = document.getElementById('nameInput');
+  if (inp) inp.placeholder = t.placeholder;
+  var joinBtn = document.getElementById('nsJoinBtn');
+  if (joinBtn) joinBtn.textContent = t.join;
+  var adEl = document.getElementById('nsAd');
+  if (adEl) adEl.innerHTML = '<a onclick="alert(\'광고 문의 준비 중\')">' + t.adLink + '</a> ' + t.adText;
+
+  // Update links
+  var links = document.getElementById('nsLinks');
+  if (links) links.innerHTML =
+    '<span onclick="showHowTo()">' + t.howto + '</span>' +
+    '<span>|</span>' +
+    '<span onclick="switchNsLang()">🌐 ' + (lang==='ko'?'EN':'한') + '</span>' +
+    '<span>|</span>' +
+    '<span onclick="window.open(\'https://x.com/kimmyungrae80\',\'_blank\')">' + t.xlink + '</span>';
+
+  // Update how-to close button
+  var tutBtn = document.getElementById('tutBtn');
+  if (tutBtn) tutBtn.textContent = t.howtoClose;
+
+  // Apply rest of lang
+  applyLang();
+}
+
+
+var L = {
+  ko: {
+    // Top stats
+    lSaved:'구출', lDead:'희생', lAlive:'생존자', lZom:'좀비', lScore:'점수',
+    // Toolbar
+    apLabel:'행동력 (AP)',
+    btnStart:'▶ 웨이브 시작', btnNext:'계속 →',
+    t0:'대피소', t1:'바리케이드', t2:'구조대', t3:'폭탄',
+    // Tutorial
+    tutSub:'좀비가 사방에서 도시를 침범한다.<br>한정된 자원으로 시민을 구출하라. 5웨이브를 버텨야 승리!',
+    tc0n:'대피소',  tc0d:'시민 목적지<br>도착하면 구출',
+    tc1n:'바리케이드', tc1d:'좀비 3턴 차단<br>경로 통제',
+    tc2n:'구조대',  tc2d:'잡힌 시민 구출<br>인접 셀 효과',
+    tc3n:'폭탄',   tc3d:'3x3 범위 폭발<br>좀비 즉시 제거',
+    tc4n:'좀비',   tc4d:'4방향 침입<br>레벨마다 강해짐',
+    tc5n:'시민',   tc5d:'도시 분산 배치<br>자동으로 피함',
+    step1:'① 도로 클릭 → 설비 배치', step2:'② 웨이브 시작 클릭',
+    step3:'③ 희생 10명이면 패배',    step4:'④ 5웨이브 클리어 = 승리',
+    step5:'⑤ AP는 매 웨이브 조금씩 충전',
+    tutBtn:'게임 시작',
+    // Buttons
+    btnWin1:'처음부터 다시', btnWin2:'+ 하드모드 계속',
+    btnOver1:'처음부터',    btnOver2:'이 웨이브 재도전',
+    // Logs
+    logReady:'준비. 배치를 완료하세요.',
+    logSides:'침입', logStart:'시작!', logDir:'방향',
+    logBarrier:'🚧 바리케이드 차단!', logRescue:'🚒 구조대 구출!',
+    logDead:'💀 시민 희생', logEvac:'🏠 대피 성공! +20pts',
+    logAP:'⚠ AP 부족!', logBomb:'💣 폭발! 좀비',
+    logBombKill:'마리 제거', logPlaced:'설치 완료',
+    logShelterKeep:'WAVE — 대피소는 유지됩니다.',
+    logRetry:'웨이브 재도전! AP 부분 복구됨.',
+    // Wave clear
+    clearSaved:'명 구출 · 누적 점수',
+    clearTotal:'구출 총', clearDead:'명 | 희생',
+    nextPreview:'예고', nextZom:'좀비', nextDir:'침입 방향',
+    nextSpeed:'속도', nextAP:'AP 충전',
+    spFast:'빠름', spMid:'보통', spSlow:'느림',
+    sideNames:['우측만','좌우','3방향','사방'],
+    sideLabel:['우측','좌우','3방향','사방'],
+    // Victory/Over
+    winSub:'5웨이브를 모두 클리어했습니다!<br>도시가 살아남았습니다. 하드모드에 도전해보세요!',
+    winScore:'최종 점수', winSaved:'구출',
+    overSub:'희생자가 10명에 달해 도시가 함락됐습니다.<br>팁: 바리케이드로 좀비 경로를 막고 구조대를 위험구역에 배치하세요.',
+    overScore:'점수', overWave:'WAVE',
+    finalSaved:'구출', finalDead:'희생'
+  },
+  en: {
+    lSaved:'Saved', lDead:'Dead', lAlive:'Alive', lZom:'Zombies', lScore:'Score',
+    apLabel:'ACTION POINTS',
+    btnStart:'▶ START WAVE', btnNext:'Continue →',
+    t0:'Shelter', t1:'Barricade', t2:'Rescue', t3:'Bomb',
+    tutSub:'Zombies invade from all sides.<br>Evacuate citizens with limited resources. Survive 5 waves to win!',
+    tc0n:'Shelter',   tc0d:'Citizen destination<br>Saves on arrival',
+    tc1n:'Barricade', tc1d:'Blocks zombies 3 turns<br>Control routes',
+    tc2n:'Rescue',    tc2d:'Saves caught citizens<br>Adjacent cell effect',
+    tc3n:'Bomb',      tc3d:'3x3 blast radius<br>Instant zombie kill',
+    tc4n:'Zombie',    tc4d:'Invades from 4 sides<br>Gets stronger each level',
+    tc5n:'Citizen',   tc5d:'Scattered in city<br>Auto-flees zombies',
+    step1:'① Click roads to place', step2:'② Click START WAVE',
+    step3:'③ 10 deaths = Game Over', step4:'④ Clear 5 waves = Win',
+    step5:'⑤ AP refills slightly each wave',
+    tutBtn:'START GAME',
+    btnWin1:'Play Again', btnWin2:'+ Hard Mode',
+    btnOver1:'Restart',   btnOver2:'Retry This Wave',
+    logReady:'Ready. Place your defenses.',
+    logSides:'invasion', logStart:'Start!', logDir:'direction',
+    logBarrier:'🚧 Barricade blocked!', logRescue:'🚒 Rescue saved citizen!',
+    logDead:'💀 Citizen lost', logEvac:'🏠 Evacuated! +20pts',
+    logAP:'⚠ Not enough AP!', logBomb:'💣 Explosion! Killed',
+    logBombKill:'zombies', logPlaced:'placed',
+    logShelterKeep:'WAVE — Shelters are kept.',
+    logRetry:'Retrying wave! AP partially restored.',
+    clearSaved:'saved · Total score',
+    clearTotal:'Total saved', clearDead:' | Dead',
+    nextPreview:'Preview', nextZom:'Zombies', nextDir:'Invasion',
+    nextSpeed:'Speed', nextAP:'AP refill',
+    spFast:'Fast', spMid:'Medium', spSlow:'Slow',
+    sideNames:['Right only','Left+Right','3 sides','All sides'],
+    sideLabel:['right','left+right','3 sides','all sides'],
+    winSub:'All 5 waves cleared!<br>The city survived. Try Hard Mode!',
+    winScore:'Final Score', winSaved:'Saved',
+    overSub:'10 casualties reached. The city has fallen.<br>Tip: Use barricades to block routes and rescue teams in danger zones.',
+    overScore:'Score', overWave:'WAVE',
+    finalSaved:'Saved', finalDead:'Dead'
+  }
+};
+
+function T(key) { return (L[lang] && L[lang][key] !== undefined) ? L[lang][key] : key; }
+
+function toggleLang() {
+  lang = lang === 'ko' ? 'en' : 'ko';
+  document.getElementById('lbtn').textContent = lang === 'ko' ? '🌐 EN' : '🌐 한';
+  applyLang();
+}
+
+function applyLang() {
+  var l = L[lang];
+  // Stats labels
+  var statLbls = document.querySelectorAll('.stat-lbl');
+  var keys = ['lSaved','lDead','lAlive','lZom','lScore'];
+  statLbls.forEach(function(el, i) { if (keys[i]) el.textContent = l[keys[i]]; });
+  // Toolbar
+  document.querySelector('.ap-label').textContent = l.apLabel;
+  document.getElementById('btnStart').textContent = l.btnStart;
+  document.getElementById('btnNext').textContent  = l.btnNext;
+  ['t0','t1','t2','t3'].forEach(function(k, i) {
+    var btn = document.getElementById('tb' + i);
+    if (btn) btn.querySelector('.tool-name').textContent = l[k];
+  });
+  // Tutorial overlay
+  document.getElementById('tutSub').innerHTML  = l.tutSub;
+  for (var i = 0; i < 6; i++) {
+    var nn = document.getElementById('tcn' + i);
+    var nd = document.getElementById('tcd' + i);
+    if (nn) nn.textContent = l['tc' + i + 'n'];
+    if (nd) nd.innerHTML   = l['tc' + i + 'd'];
+  }
+  ['step1','step2','step3','step4','step5'].forEach(function(k) {
+    var el = document.getElementById(k); if (el) el.textContent = l[k];
+  });
+  document.getElementById('tutBtn').textContent = l.tutBtn;
+  // Victory buttons
+  var wb = document.querySelectorAll('#ovWin .ov-btn');
+  if (wb[0]) wb[0].textContent = l.btnWin1;
+  if (wb[1]) wb[1].textContent = l.btnWin2;
+  // Game over buttons
+  var ob = document.querySelectorAll('#ovOver .ov-btn');
+  if (ob[0]) ob[0].textContent = l.btnOver1;
+  if (ob[1]) ob[1].textContent = l.btnOver2;
+}
+
+var COLS = 16, ROWS = 12, TILE = 2.0;
+var CELL_ROAD = 0, CELL_BLDG = 1, CELL_SHELTER = 2, CELL_BARRIER = 3, CELL_RESCUE = 4, CELL_BOMB = 5, CELL_AD = 6;
+var OX = -COLS * TILE / 2 + TILE / 2;
+var OZ = -ROWS * TILE / 2 + TILE / 2;
+var MAX_WAVES = 5;
+var MAX_DEAD = 10;
+
+// Tool definitions
+var TOOLS = [
+  { id:'shelter', name:'대피소', icon:'🏠', cost:3, cls:'t-shelter' },
+  { id:'barrier', name:'바리케이드', icon:'🚧', cost:1, cls:'t-barrier' },
+  { id:'rescue',  name:'구조대',    icon:'🚒', cost:4, cls:'t-rescue'  },
+  { id:'bomb',    name:'폭탄',      icon:'💣', cost:5, cls:'t-bomb'    }
+];
+
+// Difficulty tiers
+var DIFF = [
+  { label:'EASY',     cls:'diff-1', zombiesBase:3, citizenBase:10, apBase:12, apPerWave:3, speed:500 },
+  { label:'NORMAL',   cls:'diff-2', zombiesBase:4, citizenBase:9,  apBase:10, apPerWave:2, speed:420 },
+  { label:'HARD',     cls:'diff-3', zombiesBase:6, citizenBase:8,  apBase:9,  apPerWave:2, speed:350 },
+  { label:'EXPERT',   cls:'diff-4', zombiesBase:8, citizenBase:7,  apBase:8,  apPerWave:1, speed:280 },
+  { label:'NIGHTMARE',cls:'diff-5', zombiesBase:10,citizenBase:6,  apBase:7,  apPerWave:1, speed:220 }
+];
+
+// Building color palettes
+var BLDG_COLORS = [0x1e3a5f, 0x243d6b, 0x1a3355, 0x2e5080, 0x2a4870, 0x163045, 0x354e7a];
+var ROOF_COLORS = [0x152840, 0x1e3050, 0x243660];
+
+// ════════════════════════════════════════════
+//  THREE.JS SETUP
+// ════════════════════════════════════════════
+var renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('cv'), antialias: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.shadowMap.enabled = true;
+renderer.setClearColor(0x07090f);
+
+var scene = new THREE.Scene();
+scene.fog = new THREE.FogExp2(0x07090f, 0.02);
+
+var camera = new THREE.PerspectiveCamera(42, window.innerWidth / window.innerHeight, 0.1, 300);
+camera.position.set(0, 22, 22);
+camera.lookAt(0, 0, 0);
+
+window.addEventListener('resize', function () {
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+});
+
+// Lights
+scene.add(new THREE.AmbientLight(0x99bbdd, 2.6));
+var sunLight = new THREE.DirectionalLight(0xffffff, 3.0);
+sunLight.position.set(10, 20, 10);
+sunLight.castShadow = true;
+scene.add(sunLight);
+var fillLight = new THREE.DirectionalLight(0x3355ff, 1.0);
+fillLight.position.set(-12, 8, -6);
+scene.add(fillLight);
+var greenGlow = new THREE.PointLight(0x39ff14, 2.8, 60);
+greenGlow.position.set(-5, 10, -5);
+scene.add(greenGlow);
+var redGlow = new THREE.PointLight(0xff3333, 1.8, 50);
+redGlow.position.set(5, 7, 5);
+scene.add(redGlow);
+
+// ════════════════════════════════════════════
+//  GAME STATE
+// ════════════════════════════════════════════
+var G = {
+  wave: 1,
+  ap: 12, maxAp: 12,
+  savedTotal: 0,
+  deadTotal: 0,
+  score: 0,
+  tool: 0,        // index into TOOLS
+  running: false,
+  over: false,
+  hardMode: false, // continues past wave 5
+  retryWave: false,
+  grid: [],
+  entities: [],
+  tileMeshes: [],
+  entityMeshes: {},
+  ticker: null,
+  logs: [],
+  tickSpeed: 450
+};
+
+function diffLevel() {
+  var lvl = Math.min(G.wave - 1, DIFF.length - 1);
+  if (G.hardMode) lvl = Math.min(lvl + 2, DIFF.length - 1);
+  return lvl;
+}
+function diff() { return DIFF[diffLevel()]; }
+
+// ════════════════════════════════════════════
+//  AD BILLBOARDS — 광고판 설정
+//  나중에 광고주 생기면 text/color만 바꾸면 됨
+// ════════════════════════════════════════════
+var AD_SLOTS = [
+  // 고정 위치 4곳 — 맵 코너 건물 자리
+  { r: 1,        c: 1,        text: 'YOUR AD\nHERE',   color: 0x334455, emissive: 0x223344, textColor: '#667788', sponsored: false },
+  { r: 1,        c: COLS - 2, text: 'YOUR AD\nHERE',   color: 0x334455, emissive: 0x223344, textColor: '#667788', sponsored: false },
+  { r: ROWS - 2, c: 1,        text: 'YOUR AD\nHERE',   color: 0x334455, emissive: 0x223344, textColor: '#667788', sponsored: false },
+  { r: ROWS - 2, c: COLS - 2, text: 'YOUR AD\nHERE',   color: 0x334455, emissive: 0x223344, textColor: '#667788', sponsored: false }
+];
+// 실제 광고 예시 (스폰서 생기면 이렇게 바꿈):
+// { r:1, c:1, text:'DREX\nTRAINING', color:0x0a2040, emissive:0x0055aa, textColor:'#00aaff', sponsored:true }
+
+var adMeshes = [];
+
+function buildAdBillboards() {
+  // 기존 광고판 제거
+  adMeshes.forEach(function(m) { scene.remove(m); });
+  adMeshes = [];
+
+  AD_SLOTS.forEach(function(slot) {
+    var group = new THREE.Group();
+    var pos = worldPos(slot.r, slot.c);
+
+    // 지면
+    var base = new THREE.Mesh(
+      new THREE.BoxGeometry(TILE - 0.05, 0.1, TILE - 0.05),
+      new THREE.MeshLambertMaterial({ color: 0x182030 })
+    );
+    base.position.set(0, 0.05, 0);
+    group.add(base);
+
+    // 기둥
+    var pole = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.08, 0.08, 2.0, 8),
+      new THREE.MeshLambertMaterial({ color: 0x445566 })
+    );
+    pole.position.set(0, 1.1, 0);
+    group.add(pole);
+
+    // 광고판 패널
+    var board = new THREE.Mesh(
+      new THREE.BoxGeometry(TILE * 0.88, 0.9, 0.1),
+      new THREE.MeshLambertMaterial({
+        color: slot.color,
+        emissive: slot.emissive,
+        emissiveIntensity: slot.sponsored ? 0.6 : 0.2
+      })
+    );
+    board.position.set(0, 2.15, 0);
+    group.add(board);
+
+    // 테두리
+    var frame = new THREE.Mesh(
+      new THREE.BoxGeometry(TILE * 0.92, 0.94, 0.06),
+      new THREE.MeshLambertMaterial({ color: slot.sponsored ? 0x0088cc : 0x445566 })
+    );
+    frame.position.set(0, 2.15, -0.04);
+    group.add(frame);
+
+    // 스폰서 광고판은 빛남
+    if (slot.sponsored) {
+      var adGlow = new THREE.PointLight(0x0088ff, 1.5, 4);
+      adGlow.position.set(0, 2.5, 0.5);
+      group.add(adGlow);
+    }
+
+    // "YOUR AD HERE" 표시 — 작은 사각형으로 표현
+    var innerW = slot.sponsored ? 0.7 : 0.5;
+    var inner = new THREE.Mesh(
+      new THREE.BoxGeometry(TILE * innerW, 0.18, 0.01),
+      new THREE.MeshBasicMaterial({ color: slot.sponsored ? 0x00aaff : 0x556677 })
+    );
+    inner.position.set(0, 2.22, 0.06);
+    group.add(inner);
+    var inner2 = new THREE.Mesh(
+      new THREE.BoxGeometry(TILE * 0.55, 0.14, 0.01),
+      new THREE.MeshBasicMaterial({ color: slot.sponsored ? 0x0088cc : 0x445566 })
+    );
+    inner2.position.set(0, 2.02, 0.06);
+    group.add(inner2);
+
+    group.position.copy(pos);
+    scene.add(group);
+    adMeshes.push(group);
+  });
+}
+
+function worldPos(r, c) {
+  return new THREE.Vector3(OX + c * TILE, 0, OZ + r * TILE);
+}
+
+function generateGrid() {
+  // Different map patterns per wave group
+  var pattern = (G.wave <= 2) ? 0 : (G.wave <= 4) ? 1 : 2;
+  G.grid = [];
+  for (var r = 0; r < ROWS; r++) {
+    G.grid[r] = [];
+    for (var c = 0; c < COLS; c++) {
+      var isRoad;
+      if (pattern === 0) {
+        // Regular grid roads
+        isRoad = (r % 3 === 0 || c % 4 === 0);
+      } else if (pattern === 1) {
+        // More buildings, tighter roads
+        isRoad = (r % 4 === 0 || c % 3 === 0);
+      } else {
+        // Maze-like
+        isRoad = (r % 3 === 0 || c % 3 === 0) && !(r % 6 === 3 && c % 6 === 3);
+      }
+      // Always keep borders as roads (entry points)
+      if (r === 0 || r === ROWS-1 || c === 0 || c === COLS-1) isRoad = true;
+      G.grid[r][c] = isRoad ? CELL_ROAD : CELL_BLDG;
+    }
+  }
+}
+
+function buildAllTiles() {
+  // Clear old tiles
+  for (var i = 0; i < G.tileMeshes.length; i++) {
+    for (var j = 0; j < G.tileMeshes[i].length; j++) {
+      if (G.tileMeshes[i][j]) scene.remove(G.tileMeshes[i][j]);
+    }
+  }
+  G.tileMeshes = [];
+  for (var r = 0; r < ROWS; r++) {
+    G.tileMeshes[r] = [];
+    for (var c = 0; c < COLS; c++) {
+      G.tileMeshes[r][c] = null;
+      buildTile(r, c);
+    }
+  }
+}
+
+function buildTile(r, c) {
+  if (G.tileMeshes[r] && G.tileMeshes[r][c]) scene.remove(G.tileMeshes[r][c]);
+  var group = new THREE.Group();
+  var pos = worldPos(r, c);
+  var cell = G.grid[r][c];
+
+  if (cell === CELL_BLDG) {
+    // Ground pad
+    var gm = new THREE.Mesh(
+      new THREE.BoxGeometry(TILE - 0.05, 0.1, TILE - 0.05),
+      new THREE.MeshLambertMaterial({ color: 0x182030 })
+    );
+    gm.position.set(0, 0.05, 0);
+    group.add(gm);
+    // Building
+    var h = 0.8 + ((r * 7 + c * 13) % 10) * 0.18;
+    var bMat = new THREE.MeshLambertMaterial({ color: BLDG_COLORS[(r + c * 3) % BLDG_COLORS.length] });
+    var bMesh = new THREE.Mesh(new THREE.BoxGeometry(TILE * 0.68, h, TILE * 0.68), bMat);
+    bMesh.position.set(0, 0.1 + h / 2, 0);
+    bMesh.castShadow = true;
+    group.add(bMesh);
+    // Roof
+    var rfMesh = new THREE.Mesh(
+      new THREE.BoxGeometry(TILE * 0.72, 0.13, TILE * 0.72),
+      new THREE.MeshLambertMaterial({ color: ROOF_COLORS[(r + c) % ROOF_COLORS.length] })
+    );
+    rfMesh.position.set(0, 0.1 + h + 0.065, 0);
+    group.add(rfMesh);
+    // Windows — bright yellow/white
+    for (var w = 0; w < 2; w++) {
+      for (var s = -1; s <= 1; s += 2) {
+        var lit = ((r + c + w) % 3 !== 0);
+        var wMesh = new THREE.Mesh(
+          new THREE.PlaneGeometry(0.18, 0.13),
+          new THREE.MeshBasicMaterial({ color: lit ? 0xffee88 : 0x223344 })
+        );
+        wMesh.position.set(s * (TILE * 0.34 + 0.01), 0.1 + h * (0.3 + w * 0.35), 0);
+        wMesh.rotation.y = s > 0 ? 0 : Math.PI;
+        group.add(wMesh);
+      }
+    }
+    var roofPt = new THREE.PointLight(0x4488ff, 0.4, 3.5);
+    roofPt.position.set(0, 0.1 + h + 0.5, 0);
+    group.add(roofPt);
+
+  } else if (cell === CELL_ROAD) {
+    var road = new THREE.Mesh(
+      new THREE.BoxGeometry(TILE, 0.08, TILE),
+      new THREE.MeshLambertMaterial({ color: 0x1a2030 })
+    );
+    road.position.set(0, 0.04, 0);
+    road.receiveShadow = true;
+    group.add(road);
+    var line = new THREE.Mesh(
+      new THREE.BoxGeometry(0.04, 0.01, TILE * 0.45),
+      new THREE.MeshBasicMaterial({ color: 0x2a3545 })
+    );
+    line.position.set(0, 0.085, 0);
+    group.add(line);
+
+  } else if (cell === CELL_SHELTER) {
+    // Road base
+    group.add(makeRoadBase());
+    // House
+    var hMesh = new THREE.Mesh(
+      new THREE.BoxGeometry(TILE * 0.62, 0.55, TILE * 0.62),
+      new THREE.MeshLambertMaterial({ color: 0xfbbf24, emissive: 0xfbbf24, emissiveIntensity: 0.65 })
+    );
+    hMesh.position.set(0, 0.36, 0);
+    group.add(hMesh);
+    var cone = new THREE.Mesh(
+      new THREE.ConeGeometry(TILE * 0.5, 0.4, 4),
+      new THREE.MeshLambertMaterial({ color: 0xd97706 })
+    );
+    cone.position.set(0, 0.86, 0);
+    cone.rotation.y = Math.PI / 4;
+    group.add(cone);
+    var sGlow = new THREE.PointLight(0xffd700, 3.2, 7);
+    sGlow.position.set(0, 1.5, 0);
+    group.add(sGlow);
+
+  } else if (cell === CELL_BARRIER) {
+    group.add(makeRoadBase());
+    for (var bi = 0; bi < 3; bi++) {
+      var bar = new THREE.Mesh(
+        new THREE.BoxGeometry(TILE * 0.84, 0.28, 0.22),
+        new THREE.MeshLambertMaterial({
+          color: bi % 2 === 0 ? 0xff6600 : 0xffffff,
+          emissive: bi % 2 === 0 ? 0xff4400 : 0x666666,
+          emissiveIntensity: 0.4
+        })
+      );
+      bar.position.set(0, 0.1 + bi * 0.2, (bi - 1) * 0.27);
+      group.add(bar);
+    }
+    var bGlow = new THREE.PointLight(0xff6600, 1.4, 4);
+    bGlow.position.set(0, 0.9, 0);
+    group.add(bGlow);
+
+  } else if (cell === CELL_RESCUE) {
+    group.add(makeRoadBase());
+    var truck = new THREE.Mesh(
+      new THREE.BoxGeometry(TILE * 0.56, 0.4, TILE * 0.7),
+      new THREE.MeshLambertMaterial({ color: 0xa855f7, emissive: 0xa855f7, emissiveIntensity: 0.5 })
+    );
+    truck.position.set(0, 0.28, 0);
+    group.add(truck);
+    var cab = new THREE.Mesh(
+      new THREE.BoxGeometry(TILE * 0.5, 0.3, TILE * 0.3),
+      new THREE.MeshLambertMaterial({ color: 0x7c3aed, emissive: 0x7c3aed, emissiveIntensity: 0.4 })
+    );
+    cab.position.set(0, 0.58, TILE * 0.26);
+    group.add(cab);
+    var rGlow = new THREE.PointLight(0xa78bfa, 2.6, 5.5);
+    rGlow.position.set(0, 1.2, 0);
+    group.add(rGlow);
+  }
+
+  group.position.copy(pos);
+  scene.add(group);
+  if (!G.tileMeshes[r]) G.tileMeshes[r] = [];
+  G.tileMeshes[r][c] = group;
+}
+
+function makeRoadBase() {
+  var m = new THREE.Mesh(
+    new THREE.BoxGeometry(TILE, 0.08, TILE),
+    new THREE.MeshLambertMaterial({ color: 0x1a2030 })
+  );
+  m.position.set(0, 0.04, 0);
+  return m;
+}
+
+// ════════════════════════════════════════════
+//  ENTITIES
+// ════════════════════════════════════════════
+function makeCitizenMesh(e) {
+  var g = new THREE.Group();
+  var p = worldPos(e.r, e.c);
+  g.position.set(p.x, 0, p.z);
+
+  var body = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.25, 0.25, 0.62, 10),
+    new THREE.MeshLambertMaterial({ color: 0x00ccff, emissive: 0x00aaff, emissiveIntensity: 0.75 })
+  );
+  body.position.set(0, 0.57, 0);
+  g.add(body);
+
+  var head = new THREE.Mesh(
+    new THREE.SphereGeometry(0.24, 10, 10),
+    new THREE.MeshLambertMaterial({ color: 0xffe0a0, emissive: 0xffcc66, emissiveIntensity: 0.35 })
+  );
+  head.position.set(0, 1.1, 0);
+  g.add(head);
+
+  var glow = new THREE.PointLight(0x00ccff, 2.2, 3.5);
+  glow.position.set(0, 0.8, 0);
+  g.add(glow);
+
+  scene.add(g);
+  G.entityMeshes[e.uid] = g;
+}
+
+function makeZombieMesh(e) {
+  var g = new THREE.Group();
+  var p = worldPos(e.r, e.c);
+  g.position.set(p.x, 0, p.z);
+
+  var body = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.29, 0.31, 0.7, 8),
+    new THREE.MeshLambertMaterial({ color: 0x2d5a2d, emissive: 0x39ff14, emissiveIntensity: 0.85 })
+  );
+  body.position.set(0, 0.62, 0);
+  g.add(body);
+
+  var head = new THREE.Mesh(
+    new THREE.SphereGeometry(0.27, 8, 8),
+    new THREE.MeshLambertMaterial({ color: 0x3d7a3d, emissive: 0x39ff14, emissiveIntensity: 0.55 })
+  );
+  head.position.set(0, 1.2, 0);
+  g.add(head);
+
+  var eyeMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+  var e1 = new THREE.Mesh(new THREE.SphereGeometry(0.075, 6, 6), eyeMat);
+  e1.position.set(-0.1, 1.24, 0.23); g.add(e1);
+  var e2 = new THREE.Mesh(new THREE.SphereGeometry(0.075, 6, 6), eyeMat);
+  e2.position.set(0.1, 1.24, 0.23); g.add(e2);
+
+  var arms = new THREE.Mesh(
+    new THREE.BoxGeometry(0.65, 0.11, 0.11),
+    new THREE.MeshLambertMaterial({ color: 0x2d5a2d, emissive: 0x39ff14, emissiveIntensity: 0.5 })
+  );
+  arms.position.set(0, 0.88, 0);
+  g.add(arms);
+
+  var zGlow = new THREE.PointLight(0x39ff14, 3.2, 5);
+  zGlow.position.set(0, 1.1, 0);
+  g.add(zGlow);
+
+  scene.add(g);
+  G.entityMeshes[e.uid] = g;
+}
+
+function removeEntityMesh(uid) {
+  if (G.entityMeshes[uid]) {
+    scene.remove(G.entityMeshes[uid]);
+    delete G.entityMeshes[uid];
+  }
+}
+
+function clearAllEntities() {
+  for (var i = 0; i < G.entities.length; i++) removeEntityMesh(G.entities[i].uid);
+  G.entities = [];
+}
+
+// ════════════════════════════════════════════
+//  SPAWNING
+// ════════════════════════════════════════════
+var uidCounter = 0;
+function newUID() { return ++uidCounter; }
+
+function spawnWave() {
+  clearAllEntities();
+  var d = diff();
+  var citizenCount = d.citizenBase + Math.floor(G.wave * 0.5);
+  var zombieCount  = d.zombiesBase + G.wave;
+
+  // Collect interior road cells for citizens
+  var roads = [];
+  for (var r = 2; r < ROWS - 2; r++) {
+    for (var c = 2; c < COLS - 4; c++) {
+      if (G.grid[r][c] === CELL_ROAD) roads.push({ r: r, c: c });
+    }
+  }
+  shuffle(roads);
+  for (var i = 0; i < Math.min(citizenCount, roads.length); i++) {
+    var e = { uid: newUID(), type: 'citizen', r: roads[i].r, c: roads[i].c, alive: true, saved: false, moveDelay: 0 };
+    G.entities.push(e);
+    makeCitizenMesh(e);
+  }
+
+  // Zombies come from 4 borders — weighted by wave
+  var spawnEdges = getZombieSpawnEdges(zombieCount);
+  for (var i = 0; i < spawnEdges.length; i++) {
+    var sp = spawnEdges[i];
+    var ez = { uid: newUID(), type: 'zombie', r: sp.r, c: sp.c, alive: true, moveDelay: 0, speed: d.speed };
+    G.entities.push(ez);
+    makeZombieMesh(ez);
+  }
+}
+
+function getZombieSpawnEdges(count) {
+  var positions = [];
+  // Higher waves spawn from more sides simultaneously
+  var sides = Math.min(1 + Math.floor(G.wave / 2), 4);
+  var sideList = shuffle_copy([0, 1, 2, 3]).slice(0, sides); // 0=right,1=left,2=bottom,3=top
+
+  for (var i = 0; i < count; i++) {
+    var side = sideList[i % sideList.length];
+    var r, c;
+    if (side === 0) { c = COLS - 1; r = 1 + Math.floor(Math.random() * (ROWS - 2)); }
+    else if (side === 1) { c = 0; r = 1 + Math.floor(Math.random() * (ROWS - 2)); }
+    else if (side === 2) { r = ROWS - 1; c = 1 + Math.floor(Math.random() * (COLS - 2)); }
+    else { r = 0; c = 1 + Math.floor(Math.random() * (COLS - 2)); }
+    positions.push({ r: r, c: c });
+  }
+  return positions;
+}
+
+// ════════════════════════════════════════════
+//  CLICK PLACEMENT
+// ════════════════════════════════════════════
+var raycaster = new THREE.Raycaster();
+var mouseVec = new THREE.Vector2();
+var groundPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+
+document.getElementById('cv').addEventListener('click', function (ev) {
+  if (G.running || G.over) return;
+  if (ev.clientY < 60 || ev.clientY > window.innerHeight - 72) return;
+
+  mouseVec.x = (ev.clientX / window.innerWidth) * 2 - 1;
+  mouseVec.y = -(ev.clientY / window.innerHeight) * 2 + 1;
+  raycaster.setFromCamera(mouseVec, camera);
+
+  var pt = new THREE.Vector3();
+  if (!raycaster.ray.intersectPlane(groundPlane, pt)) return;
+
+  var c = Math.round((pt.x - OX) / TILE);
+  var r = Math.round((pt.z - OZ) / TILE);
+  if (r < 0 || r >= ROWS || c < 0 || c >= COLS) return;
+  if (G.grid[r][c] !== CELL_ROAD) return;
+
+  var toolDef = TOOLS[G.tool];
+  if (G.ap < toolDef.cost) { addLog('⚠ AP 부족! (' + toolDef.cost + ' 필요)', 'warn'); return; }
+
+  // Bomb is placed and immediately detonates
+  if (toolDef.id === 'bomb') {
+    placeBomb(r, c);
+    return;
+  }
+
+  var cellType = { shelter: CELL_SHELTER, barrier: CELL_BARRIER, rescue: CELL_RESCUE }[toolDef.id];
+  G.ap -= toolDef.cost;
+  G.grid[r][c] = cellType;
+  buildTile(r, c);
+  updateHUD();
+  addLog(toolDef.name + ' 설치 완료', 'good');
+});
+
+function placeBomb(r, c) {
+  // Deduct AP, then explode 3x3 area killing zombies
+  G.ap -= TOOLS[3].cost;
+  updateHUD();
+  // Visual flash
+  var flashGeo = new THREE.SphereGeometry(TILE * 1.5, 8, 8);
+  var flashMat = new THREE.MeshBasicMaterial({ color: 0xff6600, transparent: true, opacity: 0.8 });
+  var flash = new THREE.Mesh(flashGeo, flashMat);
+  var p = worldPos(r, c);
+  flash.position.copy(p);
+  flash.position.y = 0.5;
+  scene.add(flash);
+  setTimeout(function () { scene.remove(flash); }, 400);
+
+  // Kill zombies in 3x3
+  var killed = 0;
+  var toRemove = [];
+  for (var i = 0; i < G.entities.length; i++) {
+    var e = G.entities[i];
+    if (e.type === 'zombie' && e.alive) {
+      if (Math.abs(e.r - r) <= 1 && Math.abs(e.c - c) <= 1) {
+        e.alive = false; killed++;
+        toRemove.push(e.uid);
+      }
+    }
+  }
+  toRemove.forEach(function (uid) { removeEntityMesh(uid); });
+  G.score += killed * 10;
+  addLog(T('logBomb') + ' ' + killed + ' ' + T('logBombKill'), killed > 0 ? 'good' : 'info');
+  updateHUD();
+}
+
+// ════════════════════════════════════════════
+//  TOOL SELECT
+// ════════════════════════════════════════════
+function selTool(idx) {
+  G.tool = idx;
+  for (var i = 0; i < TOOLS.length; i++) {
+    var btn = document.getElementById('tb' + i);
+    btn.className = 'tool ' + TOOLS[i].cls + (i === idx ? ' active' : '');
+  }
+}
+
+// ════════════════════════════════════════════
+//  GAME FLOW
+// ════════════════════════════════════════════
+function initGame() {
+  hideAllOverlays();
+  G.wave = 1;
+  G.savedTotal = 0;
+  G.deadTotal = 0;
+  G.score = 0;
+  G.over = false;
+  G.hardMode = false;
+  var d = diff();
+  G.ap = d.apBase;
+  G.maxAp = d.apBase;
+  G.tickSpeed = d.speed;
+  prepareWave();
+}
+
+function prepareWave() {
+  if (G.ticker) clearInterval(G.ticker);
+  G.running = false;
+  G.over = false;
+
+  generateGrid();
+  buildAllTiles();
+  buildAdBillboards();
+  spawnWave();
+  updateHUD();
+  updateDiffBadge();
+
+  document.getElementById('btnStart').classList.remove('hidden');
+  document.getElementById('btnNext').classList.add('hidden');
+  document.getElementById('wpill').textContent = 'WAVE ' + G.wave;
+
+  addLog('WAVE ' + G.wave + ' ' + T('logReady'), 'info');
+  var d = diff();
+  addLog(lang==='ko' ? '좀비 ' + (d.zombiesBase + G.wave) + '마리 / ' + sides_label() + ' ' + T('logSides') : (d.zombiesBase + G.wave) + ' zombies / ' + sides_label() + ' ' + T('logSides'), 'warn');
+}
+
+function sides_label() {
+  var sides = Math.min(1 + Math.floor(G.wave / 2), 4);
+  return T('sideNames')[Math.min(sides - 1, 3)];
+}
+
+function startWave() {
+  if (G.running) return;
+  G.running = true;
+  document.getElementById('btnStart').classList.add('hidden');
+  addLog('⚠ WAVE ' + G.wave + ' ' + T('logStart') + ' ' + sides_label() + ' ' + T('logSides') + '!', 'warn');
+  G.ticker = setInterval(tick, G.tickSpeed);
+}
+
+function proceedNext() {
+  hideAllOverlays();
+  G.wave++;
+
+  // Refill AP (limited — strategic tension)
+  var d = diff();
+  G.ap = Math.min(G.maxAp + d.apPerWave, G.maxAp + 6);
+  G.maxAp = G.ap;
+  G.tickSpeed = d.speed;
+
+  // Keep shelters, clear barriers/rescue
+  for (var r = 0; r < ROWS; r++) {
+    for (var c = 0; c < COLS; c++) {
+      if (G.grid[r][c] === CELL_BARRIER || G.grid[r][c] === CELL_RESCUE) {
+        G.grid[r][c] = CELL_ROAD;
+      }
+    }
+  }
+
+  clearAllEntities();
+  generateGrid();
+  buildAllTiles();
+  buildAdBillboards();
+  spawnWave();
+  updateHUD();
+  updateDiffBadge();
+  document.getElementById('btnStart').classList.remove('hidden');
+  document.getElementById('btnNext').classList.add('hidden');
+  document.getElementById('wpill').textContent = 'WAVE ' + G.wave;
+  addLog('WAVE ' + G.wave + ' ' + T('logShelterKeep'), 'good');
+  addLog((lang==='ko' ? '좀비 ' + (diff().zombiesBase + G.wave) + '마리 / ' + sides_label() + ' ' : (diff().zombiesBase + G.wave) + ' zombies / ' + sides_label() + ' ') + T('logDir'), 'warn');
+}
+
+function retrySameWave() {
+  hideAllOverlays();
+  G.over = false;
+  G.deadTotal = Math.max(0, G.deadTotal - 5);
+  var d = diff();
+  G.ap = Math.max(d.apBase - 2, 5);
+  clearAllEntities();
+  for (var r = 0; r < ROWS; r++) {
+    for (var c = 0; c < COLS; c++) {
+      if (G.grid[r][c] === CELL_BARRIER || G.grid[r][c] === CELL_RESCUE) G.grid[r][c] = CELL_ROAD;
+    }
+  }
+  buildAllTiles();
+  spawnWave();
+  updateHUD();
+  document.getElementById('btnStart').classList.remove('hidden');
+  document.getElementById('btnNext').classList.add('hidden');
+  addLog(T('logRetry'), 'info');
+}
+
+function fullReset() {
+  // 이름 입력 화면으로 돌아가기
+  hideAllOverlays();
+  if (G.ticker) clearInterval(G.ticker);
+  clearAllEntities();
+  document.getElementById('nameScreen').classList.remove('hidden');
+  document.getElementById('playerTag').classList.add('hidden');
+  document.getElementById('nameInput').value = '';
+  G.wave = 1; G.savedTotal = 0; G.deadTotal = 0; G.score = 0;
+  G.running = false; G.over = false; G.hardMode = false;
+  document.getElementById('btnStart').classList.remove('hidden');
+  document.getElementById('btnNext').classList.add('hidden');
+  document.getElementById('log').innerHTML = '';
+  G.logs = [];
+}
+
+function continueHard() {
+  G.hardMode = true;
+  proceedNext();
+}
+
+// ════════════════════════════════════════════
+//  TICK / SIMULATION
+// ════════════════════════════════════════════
+function tick() {
+  var zombies  = G.entities.filter(function (e) { return e.type === 'zombie'  && e.alive; });
+  var citizens = G.entities.filter(function (e) { return e.type === 'citizen' && e.alive && !e.saved; });
+
+  // ── Move zombies ──
+  zombies.forEach(function (z) {
+    if (z.moveDelay > 0) { z.moveDelay--; return; }
+
+    // Find nearest citizen
+    var tgt = null, minD = 9999;
+    citizens.forEach(function (c) {
+      var d = Math.abs(c.r - z.r) + Math.abs(c.c - z.c);
+      if (d < minD) { minD = d; tgt = c; }
+    });
+    if (!tgt) return;
+
+    // Choose direction
+    var dr = 0, dc = 0;
+    if (Math.abs(tgt.r - z.r) >= Math.abs(tgt.c - z.c)) dr = tgt.r > z.r ? 1 : -1;
+    else dc = tgt.c > z.c ? 1 : -1;
+
+    var nr = z.r + dr, nc = z.c + dc;
+    if (nr >= 0 && nr < ROWS && nc >= 0 && nc < COLS) {
+      var cell = G.grid[nr][nc];
+      if (cell === CELL_BARRIER) {
+        z.moveDelay = 3;
+        addLog(T('logBarrier'));
+        return;
+      }
+      if (cell !== CELL_BLDG) { z.r = nr; z.c = nc; }
+      else {
+        // Try alternate direction
+        var ar = z.r + (dc === 0 ? 0 : dr === 0 ? (Math.random() > .5 ? 1 : -1) : 0);
+        var ac = z.c + (dr === 0 ? 0 : dc === 0 ? (Math.random() > .5 ? 1 : -1) : 0);
+        if (ar >= 0 && ar < ROWS && ac >= 0 && ac < COLS && G.grid[ar][ac] !== CELL_BLDG && G.grid[ar][ac] !== CELL_BARRIER) {
+          z.r = ar; z.c = ac;
+        }
+      }
+    }
+
+    // Catch citizen on same cell
+    citizens.forEach(function (cit) {
+      if (!cit.alive || cit.saved) return;
+      if (cit.r === z.r && cit.c === z.c) {
+        var rescueNearby = hasAdjacentCell(cit.r, cit.c, CELL_RESCUE);
+        if (rescueNearby) {
+          cit.saved = true; G.savedTotal++; G.score += 15;
+          addLog(T('logRescue'), 'good');
+        } else {
+          cit.alive = false; G.deadTotal++;
+          removeEntityMesh(cit.uid);
+          addLog(T('logDead') + ' (' + G.deadTotal + '/' + MAX_DEAD + ')', 'warn');
+        }
+      }
+    });
+  });
+
+  // ── Move citizens toward shelter ──
+  citizens.forEach(function (cit) {
+    if (!cit.alive || cit.saved) return;
+    if (cit.moveDelay > 0) { cit.moveDelay--; return; }
+
+    // Reached shelter?
+    if (G.grid[cit.r][cit.c] === CELL_SHELTER) {
+      cit.saved = true; G.savedTotal++; G.score += 20;
+      removeEntityMesh(cit.uid);
+      addLog(T('logEvac'), 'good');
+      return;
+    }
+
+    // Find nearest shelter
+    var bestShelter = null, bestD = 9999;
+    for (var r = 0; r < ROWS; r++) {
+      for (var c = 0; c < COLS; c++) {
+        if (G.grid[r][c] === CELL_SHELTER) {
+          var d = Math.abs(r - cit.r) + Math.abs(c - cit.c);
+          if (d < bestD) { bestD = d; bestShelter = { r: r, c: c }; }
+        }
+      }
+    }
+
+    if (!bestShelter) {
+      // No shelter — flee from nearest zombie
+      fleeFromZombies(cit, zombies);
+      return;
+    }
+
+    // Move toward shelter, avoid zombies if too close
+    var nearZombie = zombies.some(function (z) { return Math.abs(z.r - cit.r) + Math.abs(z.c - cit.c) <= 2; });
+    if (nearZombie) { fleeFromZombies(cit, zombies); return; }
+
+    var dr = bestShelter.r - cit.r, dc2 = bestShelter.c - cit.c;
+    var nr = cit.r, nc = cit.c;
+    if (Math.abs(dr) >= Math.abs(dc2)) nr += (dr > 0 ? 1 : -1);
+    else nc += (dc2 > 0 ? 1 : -1);
+
+    if (nr >= 0 && nr < ROWS && nc >= 0 && nc < COLS && G.grid[nr][nc] !== CELL_BLDG && G.grid[nr][nc] !== CELL_BARRIER) {
+      cit.r = nr; cit.c = nc;
+    }
+    cit.moveDelay = 1;
+  });
+
+  updateHUD();
+
+  // ── Check end conditions ──
+  if (G.deadTotal >= MAX_DEAD) {
+    endWave(false);
+    return;
+  }
+
+  var stillAlive = G.entities.filter(function (e) { return e.type === 'citizen' && e.alive && !e.saved; });
+  if (stillAlive.length === 0) {
+    endWave(true);
+  }
+}
+
+function fleeFromZombies(cit, zombies) {
+  if (zombies.length === 0) return;
+  var nearZ = zombies.reduce(function (best, z) {
+    var d = Math.abs(z.r - cit.r) + Math.abs(z.c - cit.c);
+    return (!best || d < best.d) ? { z: z, d: d } : best;
+  }, null);
+  if (!nearZ) return;
+  var dr = cit.r - nearZ.z.r, dc2 = cit.c - nearZ.z.c;
+  var nr = cit.r + (dr > 0 ? 1 : dr < 0 ? -1 : 0);
+  var nc = cit.c + (dc2 > 0 ? 1 : dc2 < 0 ? -1 : 0);
+  if (nr >= 0 && nr < ROWS && nc >= 0 && nc < COLS && G.grid[nr][nc] !== CELL_BLDG && G.grid[nr][nc] !== CELL_BARRIER) {
+    cit.r = nr; cit.c = nc;
+  }
+  cit.moveDelay = 1;
+}
+
+function hasAdjacentCell(r, c, cellType) {
+  var dirs = [[-1,0],[1,0],[0,-1],[0,1]];
+  for (var i = 0; i < dirs.length; i++) {
+    var nr = r + dirs[i][0], nc = c + dirs[i][1];
+    if (nr >= 0 && nr < ROWS && nc >= 0 && nc < COLS && G.grid[nr][nc] === cellType) return true;
+  }
+  return false;
+}
+
+function endWave(success) {
+  clearInterval(G.ticker);
+  G.running = false;
+
+  var savedThisWave = G.entities.filter(function (e) { return e.type === 'citizen' && e.saved; }).length;
+  var totalThisWave = G.entities.filter(function (e) { return e.type === 'citizen'; }).length;
+
+  if (!success) {
+    G.over = true;
+    document.getElementById('ooSub').innerHTML = T('overSub');
+    document.getElementById('ooScore').textContent = T('overScore') + ': ' + G.score + ' | ' + T('finalSaved') + ': ' + G.savedTotal + ' | ' + T('overWave') + ': ' + G.wave;
+    document.getElementById('ovOver').classList.remove('hidden');
+    return;
+  }
+
+  G.score += savedThisWave * 5 + G.wave * 20;
+  updateHUD();
+
+  var isVictory = (!G.hardMode && G.wave >= MAX_WAVES);
+  if (isVictory) {
+    document.getElementById('owSub').innerHTML = T('winSub');
+    document.getElementById('owScore').textContent = T('winScore') + ': ' + G.score + ' | ' + T('winSaved') + ': ' + G.savedTotal;
+    document.getElementById('ovWin').classList.remove('hidden');
+    return;
+  }
+
+  // Wave clear screen
+  var nextWave = G.wave + 1;
+  var nextDiff = DIFF[Math.min(nextWave - 1, DIFF.length - 1)];
+  var nextSides = Math.min(1 + Math.floor(nextWave / 2), 4);
+  var spLabel = nextDiff.speed < 350 ? T('spFast') : nextDiff.speed < 420 ? T('spMid') : T('spSlow');
+
+  document.getElementById('ocTitle').textContent = 'WAVE ' + G.wave + ' CLEAR!';
+  document.getElementById('ocSub').innerHTML = lang === 'ko'
+    ? '시민 <b>' + savedThisWave + '/' + totalThisWave + '명</b> ' + T('clearSaved') + ' <b>' + G.score + '</b>'
+    : '<b>' + savedThisWave + '/' + totalThisWave + '</b> citizens ' + T('clearSaved') + ' <b>' + G.score + '</b>';
+  document.getElementById('ocScore').textContent = T('clearTotal') + ': ' + G.savedTotal + T('clearDead') + ': ' + G.deadTotal + '/' + MAX_DEAD;
+  document.getElementById('ocNextTitle').textContent = 'WAVE ' + nextWave + ' ' + T('nextPreview');
+  document.getElementById('ocNextRow').innerHTML =
+    '<div class="wave-info-item">' + T('nextZom') + ' <span>' + (nextDiff.zombiesBase + nextWave) + (lang==='ko'?'마리':'') + '</span></div>' +
+    '<div class="wave-info-item">' + T('nextDir') + ' <span>' + T('sideNames')[Math.min(nextSides-1,3)] + '</span></div>' +
+    '<div class="wave-info-item">' + T('nextSpeed') + ' <span>' + spLabel + '</span></div>' +
+    '<div class="wave-info-item">' + T('nextAP') + ' <span>+' + nextDiff.apPerWave + '</span></div>';
+  document.getElementById('ocBtn').textContent = lang === 'ko' ? 'WAVE ' + nextWave + ' 시작 →' : 'START WAVE ' + nextWave + ' →';
+  document.getElementById('ovClear').classList.remove('hidden');
+}
+
+// ════════════════════════════════════════════
+//  HUD & UI
+// ════════════════════════════════════════════
+function updateHUD() {
+  document.getElementById('vSaved').textContent = G.savedTotal;
+  document.getElementById('vDead').textContent  = G.deadTotal;
+  document.getElementById('vAlive').textContent = G.entities.filter(function (e) { return e.type === 'citizen' && e.alive && !e.saved; }).length;
+  document.getElementById('vZom').textContent   = G.entities.filter(function (e) { return e.type === 'zombie' && e.alive; }).length;
+  document.getElementById('vScore').textContent = G.score;
+  document.getElementById('apBar').style.width  = (G.ap / G.maxAp * 100) + '%';
+  document.getElementById('apNum').textContent  = G.ap + ' / ' + G.maxAp;
+}
+
+function updateDiffBadge() {
+  var lvl = diffLevel();
+  var d = DIFF[lvl];
+  var badge = document.getElementById('diffbadge');
+  badge.textContent = d.label;
+  badge.className = 'diff-badge ' + d.cls;
+}
+
+function addLog(msg, type) {
+  G.logs.unshift({ msg: msg, type: type || '' });
+  if (G.logs.length > 4) G.logs.pop();
+  var html = '';
+  for (var i = 0; i < G.logs.length; i++) {
+    html += '<div class="log-line ' + G.logs[i].type + '">' + G.logs[i].msg + '</div>';
+  }
+  document.getElementById('log').innerHTML = html;
+}
+
+function hideAllOverlays() {
+  ['ovTut','ovClear','ovWin','ovOver'].forEach(function (id) {
+    document.getElementById(id).classList.add('hidden');
+  });
+}
+
+// ════════════════════════════════════════════
+//  UTILS
+// ════════════════════════════════════════════
+function shuffle(arr) {
+  for (var i = arr.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var t = arr[i]; arr[i] = arr[j]; arr[j] = t;
+  }
+  return arr;
+}
+function shuffle_copy(arr) { return shuffle(arr.slice()); }
+
+// ════════════════════════════════════════════
+//  RENDER LOOP
+// ════════════════════════════════════════════
+var clock = new THREE.Clock();
+
+function animate() {
+  requestAnimationFrame(animate);
+  var t = clock.getElapsedTime();
+
+  // Smooth entity movement
+  G.entities.forEach(function (e) {
+    var m = G.entityMeshes[e.uid];
+    if (!m) return;
+    var p = worldPos(e.r, e.c);
+    m.position.x += (p.x - m.position.x) * 0.28;
+    m.position.z += (p.z - m.position.z) * 0.28;
+    // Bob
+    m.position.y = Math.sin(t * 2.4 + e.uid * 0.1) * 0.05;
+    if (e.type === 'zombie') m.rotation.y = t * 2.0;
+  });
+
+  // Camera slight drift
+  camera.position.x = Math.sin(t * 0.08) * 0.3;
+  camera.lookAt(new THREE.Vector3(0, 0, 0));
+
+  // Pulse lights
+  greenGlow.intensity = 2.4 + Math.sin(t * 1.8) * 0.6;
+  redGlow.intensity   = 1.6 + Math.sin(t * 2.2 + 1) * 0.4;
+
+  renderer.render(scene, camera);
+}
+
+// ════════════════════════════════════════════
+//  BOOT
+// ════════════════════════════════════════════
+generateGrid();
+buildAllTiles();
+buildAdBillboards();
+animate();
+</script>
+</body>
+</html>
