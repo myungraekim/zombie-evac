@@ -236,7 +236,9 @@ body{background:var(--bg);color:#fff;font-family:'Noto Sans KR',sans-serif;
   <div class="act-col">
     <button class="ab" id="abBarrier" onclick="placeBarrier()">🚧</button>
     <div class="ab-lbl" id="lBarrier">장애물</div>
-    <button class="ab" id="abRescue" onclick="tryRescue()" id="abRescue">구출</button>
+    <button class="ab" id="abBomb" onclick="placeBomb()" style="background:#ff4444;box-shadow:0 4px 0 #880000;font-size:22px">💣</button>
+    <div class="ab-lbl" id="lBomb">폭탄</div>
+    <button class="ab" id="abRescue" onclick="tryRescue()">구출</button>
     <div class="ab-lbl" id="lRescue">RESCUE</div>
   </div>
 </div>
@@ -697,9 +699,11 @@ function spawnWave(){
   genMap(wconf);
   G.player={r:1,c:1,dir:'right',id:uid()};
   G.followers=[];G.citizens=[];G.zombies=[];
+  G.bombs=[];G.explosions=[];
   G.rescued=0;
   G.hitFlash=0;
   G.barrierLeft=wconf.barriers;
+  G.bombLeft=3+Math.floor(G.wave/3); // 웨이브마다 폭탄 증가
   G.timer=wconf.timer;G.timerTick=0;
 
   // 시민 배치
@@ -738,6 +742,252 @@ function drawEmoji(r,c,emoji,scale){
   ctx.font=Math.floor(TILE*scale)+'px serif';
   ctx.textAlign='center';ctx.textBaseline='middle';
   ctx.fillText(emoji,(c+.5)*TILE,(r+.5)*TILE);
+}
+
+// ── 픽셀아트 스타일 캐릭터 직접 그리기 ──
+function drawHero(r,c){
+  var x=c*TILE, y=r*TILE, T2=TILE;
+  var cx=x+T2/2, cy=y+T2/2;
+  var s=T2/32;
+
+  // 망토 (파란 영웅 망토)
+  ctx.fillStyle='#1e40af';
+  ctx.beginPath();
+  ctx.moveTo(cx-7*s, cy+2*s);
+  ctx.lineTo(cx-10*s, cy+14*s);
+  ctx.lineTo(cx+10*s, cy+14*s);
+  ctx.lineTo(cx+7*s, cy+2*s);
+  ctx.fill();
+
+  // 몸통 (빨간 슈퍼히어로 수트)
+  ctx.fillStyle='#dc2626';
+  ctx.fillRect(cx-6*s, cy-2*s, 12*s, 10*s);
+
+  // S자 엠블럼
+  ctx.fillStyle='#fbbf24';
+  ctx.font='bold '+Math.floor(8*s)+'px sans-serif';
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText('★', cx, cy+3*s);
+
+  // 머리
+  ctx.fillStyle='#fde68a';
+  ctx.beginPath();
+  ctx.arc(cx, cy-6*s, 6*s, 0, Math.PI*2);
+  ctx.fill();
+
+  // 머리카락 (검정)
+  ctx.fillStyle='#1a1a1a';
+  ctx.fillRect(cx-6*s, cy-12*s, 12*s, 5*s);
+  ctx.beginPath();
+  ctx.arc(cx, cy-9*s, 6*s, Math.PI, 0);
+  ctx.fill();
+
+  // 눈
+  ctx.fillStyle='#1e3a8a';
+  ctx.fillRect(cx-4*s, cy-7*s, 2.5*s, 2.5*s);
+  ctx.fillRect(cx+1.5*s, cy-7*s, 2.5*s, 2.5*s);
+
+  // 팔 (뻗은 자세)
+  ctx.fillStyle='#dc2626';
+  ctx.fillRect(cx-11*s, cy-2*s, 5*s, 3*s);
+  ctx.fillRect(cx+6*s, cy-2*s, 5*s, 3*s);
+
+  // 다리
+  ctx.fillStyle='#1e40af';
+  ctx.fillRect(cx-5*s, cy+8*s, 4*s, 6*s);
+  ctx.fillRect(cx+1*s, cy+8*s, 4*s, 6*s);
+
+  // 글로우 효과
+  ctx.shadowColor='#60a5fa';
+  ctx.shadowBlur=8*s;
+  ctx.beginPath();
+  ctx.arc(cx, cy-6*s, 6*s, 0, Math.PI*2);
+  ctx.strokeStyle='rgba(96,165,250,0.4)';
+  ctx.lineWidth=1.5*s;
+  ctx.stroke();
+  ctx.shadowBlur=0;
+}
+
+function drawZombie(r,c,isSuper){
+  var x=c*TILE, y=r*TILE, T2=TILE;
+  var cx=x+T2/2, cy=y+T2/2;
+  var s=T2/32;
+  var t=Date.now()*0.005;
+
+  // 몸통 (썩은 녹색)
+  ctx.fillStyle=isSuper?'#7e22ce':'#166534';
+  ctx.fillRect(cx-6*s, cy-2*s, 12*s, 11*s);
+
+  // 찢어진 옷 효과
+  ctx.fillStyle=isSuper?'#581c87':'#14532d';
+  ctx.fillRect(cx-6*s, cy+5*s, 4*s, 4*s);
+  ctx.fillRect(cx+2*s, cy+6*s, 4*s, 5*s);
+
+  // 머리 (울퉁불퉁)
+  ctx.fillStyle=isSuper?'#6b21a8':'#15803d';
+  ctx.beginPath();
+  ctx.arc(cx, cy-6*s, 6.5*s, 0, Math.PI*2);
+  ctx.fill();
+
+  // 눈 (빨간 광기)
+  var eyePulse=Math.sin(t)*0.5+0.5;
+  ctx.fillStyle=isSuper?`rgba(255,200,0,${0.7+eyePulse*0.3})`:`rgba(255,50,50,${0.7+eyePulse*0.3})`;
+  ctx.shadowColor=isSuper?'#ffd700':'#ff0000';
+  ctx.shadowBlur=4*s;
+  ctx.fillRect(cx-4.5*s, cy-8*s, 3*s, 3*s);
+  ctx.fillRect(cx+1.5*s, cy-8*s, 3*s, 3*s);
+  ctx.shadowBlur=0;
+
+  // 입 (이빨 드러냄)
+  ctx.fillStyle='#dc2626';
+  ctx.fillRect(cx-3*s, cy-3.5*s, 6*s, 2.5*s);
+  ctx.fillStyle='#fff';
+  for(var i=0;i<3;i++){
+    ctx.fillRect(cx-3*s+i*2*s, cy-3.5*s, 1.5*s, 2.5*s);
+  }
+
+  // 팔 (구부러진)
+  ctx.fillStyle=isSuper?'#7e22ce':'#166534';
+  ctx.fillRect(cx-11*s, cy-1*s, 5*s, 3*s);
+  ctx.fillRect(cx+6*s, cy-1*s, 5*s, 3*s);
+  // 손톱
+  ctx.fillStyle='#4ade80';
+  ctx.fillRect(cx-12*s, cy, 2*s, 2*s);
+  ctx.fillRect(cx+10*s, cy, 2*s, 2*s);
+
+  // 다리 (뒤뚱)
+  ctx.fillStyle=isSuper?'#581c87':'#14532d';
+  var legOff=Math.sin(t*3)*s;
+  ctx.fillRect(cx-5*s, cy+9*s, 4*s, 5*s+legOff);
+  ctx.fillRect(cx+1*s, cy+9*s, 4*s, 5*s-legOff);
+
+  // 슈퍼좀비 왕관
+  if(isSuper){
+    ctx.fillStyle='#ffd700';
+    ctx.beginPath();
+    ctx.moveTo(cx-5*s, cy-12*s);
+    ctx.lineTo(cx-3*s, cy-16*s);
+    ctx.lineTo(cx, cy-13*s);
+    ctx.lineTo(cx+3*s, cy-16*s);
+    ctx.lineTo(cx+5*s, cy-12*s);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  // 초록 글로우
+  ctx.shadowColor=isSuper?'#a855f7':'#4ade80';
+  ctx.shadowBlur=6*s;
+  ctx.beginPath();
+  ctx.arc(cx, cy-6*s, 7*s, 0, Math.PI*2);
+  ctx.strokeStyle=isSuper?'rgba(168,85,247,0.3)':'rgba(74,222,128,0.3)';
+  ctx.lineWidth=s;
+  ctx.stroke();
+  ctx.shadowBlur=0;
+}
+
+function drawCitizen(r,c,isInfected,isImmune){
+  var x=c*TILE, y=r*TILE, T2=TILE;
+  var cx=x+T2/2, cy=y+T2/2;
+  var s=T2/32;
+
+  if(isInfected){
+    // 감염 중 — 반 좀비
+    ctx.fillStyle='#854d0e';
+    ctx.fillRect(cx-5*s, cy-1*s, 10*s, 9*s);
+    ctx.fillStyle='rgba(74,222,128,0.6)';
+    ctx.fillRect(cx-5*s, cy-1*s, 10*s, 9*s);
+    ctx.fillStyle='#ca8a04';
+    ctx.beginPath();
+    ctx.arc(cx, cy-5*s, 5*s, 0, Math.PI*2);
+    ctx.fill();
+    ctx.fillStyle='rgba(255,0,0,0.7)';
+    ctx.fillRect(cx-3*s, cy-7*s, 2.5*s, 2.5*s);
+    ctx.fillRect(cx+0.5*s, cy-7*s, 2.5*s, 2.5*s);
+    return;
+  }
+
+  // 몸통 (다양한 색상)
+  var colors=['#2563eb','#7c3aed','#0891b2','#0f766e'];
+  var col=colors[Math.abs(r*7+c*3)%colors.length];
+  ctx.fillStyle=col;
+  ctx.fillRect(cx-5*s, cy-1*s, 10*s, 9*s);
+
+  // 머리
+  ctx.fillStyle='#fde68a';
+  ctx.beginPath();
+  ctx.arc(cx, cy-5.5*s, 5.5*s, 0, Math.PI*2);
+  ctx.fill();
+
+  // 눈
+  ctx.fillStyle='#1e293b';
+  ctx.fillRect(cx-3*s, cy-7*s, 2*s, 2*s);
+  ctx.fillRect(cx+1*s, cy-7*s, 2*s, 2*s);
+
+  // 면역 배지
+  if(isImmune){
+    ctx.fillStyle='#39ff14';
+    ctx.shadowColor='#39ff14';
+    ctx.shadowBlur=4*s;
+    ctx.beginPath();
+    ctx.arc(cx+5*s, cy-9*s, 3*s, 0, Math.PI*2);
+    ctx.fill();
+    ctx.shadowBlur=0;
+    ctx.fillStyle='#000';
+    ctx.font='bold '+Math.floor(4*s)+'px sans-serif';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText('✓', cx+5*s, cy-9*s);
+  }
+
+  // 팔
+  ctx.fillStyle=col;
+  ctx.fillRect(cx-9*s, cy, 4*s, 3*s);
+  ctx.fillRect(cx+5*s, cy, 4*s, 3*s);
+
+  // 다리
+  ctx.fillStyle='#475569';
+  ctx.fillRect(cx-4*s, cy+8*s, 3*s, 5*s);
+  ctx.fillRect(cx+1*s, cy+8*s, 3*s, 5*s);
+}
+
+// 폭탄 그리기
+function drawBombEntity(r,c,timer){
+  var x=c*TILE, y=r*TILE, T2=TILE;
+  var cx=x+T2/2, cy=y+T2/2;
+  var s=T2/32;
+  var blink=timer<15&&Math.floor(Date.now()/150)%2===0;
+
+  ctx.fillStyle=blink?'#ff4444':'#1a1a1a';
+  ctx.shadowColor=blink?'#ff4444':'transparent';
+  ctx.shadowBlur=blink?8*s:0;
+  ctx.beginPath();
+  ctx.arc(cx, cy+s, 9*s, 0, Math.PI*2);
+  ctx.fill();
+  ctx.shadowBlur=0;
+
+  // 도화선
+  ctx.strokeStyle=blink?'#ff6600':'#888';
+  ctx.lineWidth=2*s;
+  ctx.beginPath();
+  ctx.moveTo(cx+5*s, cy-7*s);
+  ctx.quadraticCurveTo(cx+10*s, cy-12*s, cx+7*s, cy-15*s);
+  ctx.stroke();
+
+  // 반짝이 (도화선 끝)
+  if(Math.floor(Date.now()/200)%2===0){
+    ctx.fillStyle='#ff8800';
+    ctx.shadowColor='#ff8800';
+    ctx.shadowBlur=5*s;
+    ctx.beginPath();
+    ctx.arc(cx+7*s, cy-15*s, 2*s, 0, Math.PI*2);
+    ctx.fill();
+    ctx.shadowBlur=0;
+  }
+
+  // 하이라이트
+  ctx.fillStyle='rgba(255,255,255,0.15)';
+  ctx.beginPath();
+  ctx.arc(cx-3*s, cy-2*s, 3*s, 0, Math.PI*2);
+  ctx.fill();
 }
 
 function drawTile(r,c){
@@ -791,55 +1041,70 @@ function render(){
   for(var r=0;r<ROWS;r++)for(var c=0;c<COLS;c++)drawTile(r,c);
 
   // barriers
-  G.barriers.forEach(function(b){drawEmoji(b.r,b.c,'🚧',0.8)});
+  G.barriers.forEach(function(b){
+    var bx=b.c*TILE, by=b.r*TILE;
+    ctx.fillStyle='#f97316';
+    ctx.fillRect(bx+2,by+TILE/2-3,TILE-4,6);
+    ctx.fillStyle='#fff';
+    ctx.fillRect(bx+2,by+TILE/2-1,TILE-4,2);
+    ctx.fillStyle='#dc2626';
+    for(var bi=0;bi<3;bi++){
+      ctx.fillRect(bx+4+bi*8,by+TILE/2-6,4,12);
+    }
+    ctx.strokeStyle='rgba(255,150,0,0.6)';
+    ctx.lineWidth=2;ctx.strokeRect(bx+2,by+2,TILE-4,TILE-4);
+  });
+
+  // bombs
+  if(G.bombs){
+    G.bombs.forEach(function(b){
+      if(!b.exploded) drawBombEntity(b.r,b.c,b.timer);
+    });
+  }
+
+  // explosions
+  if(G.explosions){
+    G.explosions.forEach(function(exp){
+      exp.cells.forEach(function(cell){
+        var ex=cell.c*TILE, ey=cell.r*TILE;
+        var alpha=1-exp.frame/10;
+        ctx.fillStyle='rgba(255,100,0,'+alpha+')';
+        ctx.fillRect(ex,ey,TILE,TILE);
+        ctx.fillStyle='rgba(255,255,0,'+(alpha*0.8)+')';
+        ctx.fillRect(ex+TILE/4,ey+TILE/4,TILE/2,TILE/2);
+        ctx.fillStyle='rgba(255,255,255,'+(alpha*0.5)+')';
+        ctx.fillRect(ex+TILE/3,ey+TILE/3,TILE/3,TILE/3);
+      });
+    });
+  }
 
   // citizens
   G.citizens.forEach(function(cit){
     if(cit.rescued)return;
     if(cit.infected){
-      // 감염된 시민 - 좀비처럼
-      drawEmoji(cit.r,cit.c,'🧟',0.65);
+      drawCitizen(cit.r,cit.c,true,false);
       // 감염 진행 바
       var pct=cit.infTimer/60;
-      ctx.fillStyle='rgba(255,50,50,.7)';
-      ctx.fillRect(cit.c*TILE+2,(cit.r+1)*TILE-5,Math.floor((TILE-4)*pct),3);
-    } else if(cit.immune){
-      drawEmoji(cit.r,cit.c,'🧑',0.72);
-      // 면역 표시
-      ctx.fillStyle='rgba(57,255,20,.6)';
-      ctx.font='7px sans-serif';ctx.textAlign='center';
-      ctx.fillText('💉',(cit.c+.5)*TILE,cit.r*TILE+5);
+      ctx.fillStyle='rgba(255,50,50,.85)';
+      ctx.fillRect(cit.c*TILE+2,(cit.r+1)*TILE-5,Math.floor((TILE-4)*pct),4);
     } else {
-      drawEmoji(cit.r,cit.c,'🧑',0.72);
+      drawCitizen(cit.r,cit.c,false,cit.immune);
     }
   });
 
   // followers
   G.followers.forEach(function(f,i){
-    drawEmoji(f.r,f.c,'🧑',0.68);
-    ctx.fillStyle='#fff';ctx.font='bold 7px sans-serif';ctx.textAlign='center';
+    drawCitizen(f.r,f.c,false,true);
+    ctx.fillStyle='#fbbf24';
+    ctx.font='bold 7px "Press Start 2P",monospace';
+    ctx.textAlign='center'; ctx.strokeStyle='#000'; ctx.lineWidth=2;
+    ctx.strokeText(i+1,(f.c+.5)*TILE,(f.r+1)*TILE-2);
     ctx.fillText(i+1,(f.c+.5)*TILE,(f.r+1)*TILE-2);
   });
 
-  // zombies — 무섭게!
+  // zombies
   G.zombies.forEach(function(z){
-    if(z.super){
-      // 슈퍼좀비
-      drawEmoji(z.r,z.c,'👹',0.82);
-      ctx.fillStyle='rgba(255,0,0,.3)';
-      ctx.beginPath();
-      ctx.arc((z.c+.5)*TILE,(z.r+.5)*TILE,TILE*0.5,0,Math.PI*2);
-      ctx.fill();
-    } else {
-      drawEmoji(z.r,z.c,'🧟',0.78);
-    }
-    // 눈 빛남
-    var pulse=Math.sin(Date.now()*0.008)*0.5+0.5;
-    ctx.fillStyle='rgba(255,50,50,'+pulse.toFixed(2)+')';
-    ctx.beginPath();
-    ctx.arc((z.c+.5)*TILE-4,(z.r+.3)*TILE,2,0,Math.PI*2);
-    ctx.arc((z.c+.5)*TILE+4,(z.r+.3)*TILE,2,0,Math.PI*2);
-    ctx.fill();
+    drawZombie(z.r,z.c,z.super||false);
   });
 
   // 대피소 방향 화살표 (3명 모이면 플레이어 위에 표시)
@@ -847,10 +1112,8 @@ function render(){
     var p=G.player;
     var dr=G.shelterR-p.r, dc=G.shelterC-p.c;
     var dist=Math.abs(dr)+Math.abs(dc);
-    // 대피소 주변 황금빛 glow
     ctx.fillStyle='rgba(251,191,36,0.12)';
     ctx.fillRect((G.shelterC-1)*TILE,(G.shelterR-1)*TILE,TILE*3,TILE*3);
-    // 화살표
     if(dist>1){
       var angle=Math.atan2(dr,dc);
       var ax=(p.c+.5)*TILE, ay=(p.r-.7)*TILE;
@@ -864,13 +1127,12 @@ function render(){
     }
   }
 
-  // player — 슈퍼히어로!
+  // player
   if(G.player){
     var p=G.player;
     var flash=G.hitFlash>0&&Math.floor(G.hitFlash/4)%2===0;
     if(!flash){
-      drawEmoji(p.r,p.c,'🦸',0.82);
-      // 팔로워 수
+      drawHero(p.r,p.c);
       if(G.followers.length>0){
         ctx.fillStyle='#fbbf24';
         ctx.font='bold 9px "Press Start 2P",monospace';ctx.textAlign='center';
@@ -923,6 +1185,8 @@ var KEYS={};
 window.addEventListener('keydown',function(e){
   KEYS[e.key]=true;
   if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' '].includes(e.key))e.preventDefault();
+  if(e.key==='b'||e.key==='B'){placeBomb();}
+  if(e.key===' '||e.key==='z'||e.key==='Z'){tryRescue();}
 });
 window.addEventListener('keyup',function(e){KEYS[e.key]=false;});
 
@@ -1038,8 +1302,84 @@ function placeBarrier(){
 }
 
 // ══════════════════════════════════════
-// ZOMBIE AI
+// BOMB SYSTEM
 // ══════════════════════════════════════
+function placeBomb(){
+  if(!G.running||!G.player)return;
+  if(!G.bombLeft||G.bombLeft<=0){
+    float(G.player.r,G.player.c,'💣 없음!','#ff3333');return;
+  }
+  var p=G.player;
+  // 같은 위치 중복 방지
+  for(var i=0;i<G.bombs.length;i++){
+    if(!G.bombs[i].exploded&&G.bombs[i].r===p.r&&G.bombs[i].c===p.c)return;
+  }
+  G.bombLeft--;
+  G.bombs.push({r:p.r,c:p.c,timer:35,exploded:false});
+  float(p.r,p.c,'💣 설치!','#ff8800');
+  document.getElementById('abBomb').textContent='💣×'+G.bombLeft;
+}
+
+function updateBombs(){
+  G.bombs.forEach(function(b){
+    if(b.exploded)return;
+    b.timer--;
+    if(b.timer<=0)explodeBomb(b);
+  });
+  G.bombs=G.bombs.filter(function(b){return!b.exploded;});
+  G.explosions.forEach(function(e){e.frame++;});
+  G.explosions=G.explosions.filter(function(e){return e.frame<10;});
+}
+
+function explodeBomb(b){
+  b.exploded=true;
+  var cells=[];
+  // 십자 + 대각선 3x3
+  var dirs=[
+    [0,0],[-1,0],[1,0],[0,-1],[0,1],
+    [-1,-1],[-1,1],[1,-1],[1,1],
+    [-2,0],[2,0],[0,-2],[0,2]
+  ];
+  dirs.forEach(function(d){
+    var er=b.r+d[0],ec=b.c+d[1];
+    if(er<0||er>=ROWS||ec<0||ec>=COLS)return;
+    if(G.map[er][ec]===WALL)return;
+    // 벽돌 파괴!
+    if(G.map[er][ec]===SOFT){
+      G.map[er][ec]=EMPTY;
+      G.score+=5;
+    }
+    cells.push({r:er,c:ec});
+  });
+  G.explosions.push({cells:cells,frame:0});
+
+  // 좀비 제거
+  var killed=0;
+  G.zombies=G.zombies.filter(function(z){
+    var hit=cells.some(function(cell){return cell.r===z.r&&cell.c===z.c;});
+    if(hit){G.score+=50;killed++;}
+    return!hit;
+  });
+  if(killed>0){
+    float(b.r,b.c,'💥 +'+killed*50,'#ff8800');
+    sitMsg('barrier');
+  }
+
+  // 팔로워 날아감
+  G.followers=G.followers.filter(function(f){
+    var hit=cells.some(function(cell){return cell.r===f.r&&cell.c===f.c;});
+    if(hit){
+      G.citizens.forEach(function(cit){if(cit.id===f.id){cit.rescued=false;cit.immune=false;}});
+    }
+    return!hit;
+  });
+
+  // 벽돌 파괴 후 타일 재그리기
+  cells.forEach(function(cell){
+    if(G.tileMeshes&&G.tileMeshes[cell.r]){}// 2D라서 render에서 자동 반영
+  });
+  updateHUD();
+}
 function updateZombies(){
   var wconf=WAVES[G.wave-1];
   G.zombies.forEach(function(z){
@@ -1179,14 +1519,15 @@ function loop(ts){
   floats=floats.filter(function(f){return f.life>0;});
   render();
   if(G.hitFlash>0)G.hitFlash--;
-  // barrier button update
   document.getElementById('abBarrier').textContent='🚧×'+G.barrierLeft;
+  document.getElementById('abBomb').textContent='💣×'+(G.bombLeft||0);
 }
 
 function tick(){
   if(!G.running||!G.player)return;
   tryMove();
   updateZombies();
+  updateBombs();
   updateTimer();
   // 시민 감염 진행
   G.citizens.forEach(function(cit){
