@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta property="og:title" content="ZOMBIE EVAC — 재난 대피 생존 게임">
+<meta property="og:description" content="재난방지공학 박사가 만든 실제 대피 알고리즘 기반 게임. 좀비는 재난이다.">
+<title>ZOMBIE EVAC — 재난 대피 생존 게임</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Bebas+Neue&family=Noto+Sans+KR:wght@300;400;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --black: #060608;
+  --green: #39ff14;
+  --green-dim: rgba(57,255,20,0.15);
+  --red: #ff2b2b;
+  --yellow: #ffd60a;
+  --white: #f0f0f0;
+  --gray: #888;
+  --panel: rgba(6,6,8,0.92);
+}
+
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--black);
+  color: var(--white);
+  font-family: 'Noto Sans KR', sans-serif;
+  overflow-x: hidden;
+  cursor: default;
+}
+
+/* ── NOISE TEXTURE ── */
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+}
+
+/* ── SCANLINES ── */
+body::after {
+  content: '';
+  position: fixed; inset: 0; z-index: 0;
+  background: repeating-linear-gradient(
+    0deg, transparent, transparent 3px,
+    rgba(0,0,0,0.06) 3px, rgba(0,0,0,0.06) 4px
+  );
+  pointer-events: none;
+}
+
+.z { position: relative; z-index: 1; }
+
+/* ── HERO ── */
+#hero {
+  min-height: 100vh;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 60px 24px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* 배경 격자 */
+#hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(57,255,20,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(57,255,20,0.04) 1px, transparent 1px);
+  background-size: 40px 40px;
+  animation: gridMove 20s linear infinite;
+}
+@keyframes gridMove { to { transform: translateY(40px); } }
+
+/* 배경 원 */
+#hero::after {
+  content: '';
+  position: absolute;
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(57,255,20,0.06) 0%, transparent 70%);
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  animation: pulse 4s ease-in-out infinite;
+}
+@keyframes pulse { 0%,100%{transform:translate(-50%,-50%) scale(1);} 50%{transform:translate(-50%,-50%) scale(1.15);} }
+
+.hero-alert {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 13px; letter-spacing: 5px;
+  color: var(--red);
+  background: rgba(255,43,43,0.1);
+  border: 1px solid rgba(255,43,43,0.3);
+  padding: 6px 18px; border-radius: 2px;
+  margin-bottom: 28px;
+  animation: blink 1.5s step-end infinite;
+}
+@keyframes blink { 50%{ opacity: 0; } }
+
+.hero-title {
+  font-family: 'Black Han Sans', sans-serif;
+  font-size: clamp(72px, 16vw, 140px);
+  line-height: 0.9;
+  text-align: center;
+  letter-spacing: -2px;
+  color: var(--white);
+  margin-bottom: 6px;
+}
+
+.hero-title .z-word {
+  color: var(--green);
+  text-shadow: 0 0 40px rgba(57,255,20,0.5), 0 0 80px rgba(57,255,20,0.2);
+  display: block;
+  animation: flicker 8s infinite;
+}
+@keyframes flicker {
+  0%,89%,91%,93%,100%{opacity:1}
+  90%,92%{opacity:0.4}
+}
+
+.hero-title .e-word {
+  color: var(--white);
+  display: block;
+}
+
+.hero-subtitle {
+  font-size: clamp(13px, 3vw, 18px);
+  color: var(--gray);
+  text-align: center;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin: 20px 0 36px;
+  font-weight: 300;
+}
+
+.hero-cta {
+  display: inline-flex; align-items: center; gap: 12px;
+  background: var(--green);
+  color: #000;
+  text-decoration: none;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px; letter-spacing: 4px;
+  padding: 16px 40px;
+  border-radius: 3px;
+  box-shadow: 0 0 0 0 rgba(57,255,20,0.4);
+  transition: all 0.2s;
+  margin-bottom: 16px;
+}
+.hero-cta:hover {
+  transform: scale(1.04);
+  box-shadow: 0 0 40px rgba(57,255,20,0.4);
+}
+
+.hero-meta {
+  font-size: 11px; color: rgba(255,255,255,0.3);
+  letter-spacing: 2px; text-align: center;
+}
+.hero-meta a { color: rgba(57,255,20,0.5); text-decoration: none; }
+
+.scroll-hint {
+  position: absolute; bottom: 32px; left: 50%;
+  transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  font-size: 10px; letter-spacing: 3px; color: rgba(255,255,255,0.2);
+  animation: bounce 2s ease-in-out infinite;
+}
+@keyframes bounce { 0%,100%{transform:translateX(-50%) translateY(0)} 50%{transform:translateX(-50%) translateY(8px)} }
+
+/* ── STORY ── */
+#story {
+  padding: 100px 24px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.section-label {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 11px; letter-spacing: 6px;
+  color: var(--green);
+  margin-bottom: 16px;
+  display: flex; align-items: center; gap: 12px;
+}
+.section-label::after {
+  content: ''; flex: 1; height: 1px;
+  background: linear-gradient(90deg, rgba(57,255,20,0.3), transparent);
+}
+
+.story-text {
+  font-size: clamp(28px, 5vw, 48px);
+  font-weight: 900;
+  line-height: 1.3;
+  margin-bottom: 48px;
+}
+
+.story-text em {
+  color: var(--green);
+  font-style: normal;
+}
+
+.story-text .red { color: var(--red); }
+
+/* 재난↔좀비 대응표 */
+.meta-table {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 2px;
+  margin: 48px 0;
+}
+
+.mt-cell {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  padding: 20px 24px;
+}
+
+.mt-cell.left { border-right: none; text-align: right; }
+.mt-cell.right { border-left: none; }
+.mt-cell.center {
+  background: rgba(57,255,20,0.06);
+  border-color: rgba(57,255,20,0.15);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 20px; letter-spacing: 3px;
+  color: var(--green);
+  writing-mode: vertical-rl;
+  padding: 20px 10px;
+}
+
+.mt-icon { font-size: 28px; margin-bottom: 8px; display: block; }
+.mt-label {
+  font-size: 10px; letter-spacing: 3px; text-transform: uppercase;
+  color: var(--gray); margin-bottom: 6px;
+}
+.mt-name {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px; letter-spacing: 2px;
+  margin-bottom: 6px;
+}
+.mt-name.green { color: var(--green); }
+.mt-name.red   { color: var(--red); }
+.mt-desc { font-size: 12px; color: rgba(255,255,255,0.5); line-height: 1.7; }
+
+/* ── WAVES TIMELINE ── */
+#waves {
+  padding: 80px 24px;
+  background: rgba(255,255,255,0.015);
+  border-top: 1px solid rgba(255,255,255,0.06);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.waves-inner { max-width: 900px; margin: 0 auto; }
+
+.wave-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 2px;
+  margin-top: 32px;
+}
+
+.wave-card {
+  padding: 20px 16px;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.05);
+  transition: all 0.2s;
+  cursor: default;
+  position: relative;
+  overflow: hidden;
+}
+
+.wave-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--bar-color, rgba(255,255,255,0.1));
+}
+
+.wave-card:hover {
+  background: rgba(255,255,255,0.05);
+  transform: translateY(-2px);
+}
+
+.wc-num {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 11px; letter-spacing: 2px;
+  color: var(--gray); margin-bottom: 6px;
+}
+.wc-type { font-size: 22px; margin-bottom: 6px; }
+.wc-title { font-size: 12px; font-weight: 700; margin-bottom: 4px; }
+.wc-diff {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 10px; letter-spacing: 2px;
+  padding: 2px 8px; border-radius: 2px;
+  display: inline-block; margin-top: 6px;
+}
+
+/* ── HOW TO PLAY ── */
+#howto {
+  padding: 100px 24px;
+  max-width: 900px; margin: 0 auto;
+}
+
+.mechanic-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 2px;
+  margin-top: 32px;
+}
+
+.mechanic-card {
+  padding: 28px 22px;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.06);
+  transition: all 0.2s;
+}
+.mechanic-card:hover { background: rgba(255,255,255,0.05); }
+
+.mc-icon { font-size: 36px; margin-bottom: 14px; display: block; }
+.mc-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 18px; letter-spacing: 2px; margin-bottom: 8px;
+  color: var(--white);
+}
+.mc-desc { font-size: 12px; color: rgba(255,255,255,0.5); line-height: 1.8; }
+.mc-tip {
+  margin-top: 10px; font-size: 11px;
+  color: var(--green); font-weight: 700;
+  padding-left: 10px; border-left: 2px solid var(--green);
+  line-height: 1.6;
+}
+
+/* ── HOW TO CONTROL ── */
+.control-section {
+  margin-top: 60px;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 2px;
+}
+
+.ctrl-box {
+  padding: 28px 24px;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.06);
+}
+
+.ctrl-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 13px; letter-spacing: 3px;
+  color: var(--gray); margin-bottom: 16px;
+}
+
+.ctrl-list { display: flex; flex-direction: column; gap: 10px; }
+
+.ctrl-item {
+  display: flex; align-items: center; gap: 12px;
+  font-size: 12px; color: rgba(255,255,255,0.6);
+}
+
+.ctrl-key {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 11px; letter-spacing: 1px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  padding: 3px 10px; border-radius: 3px;
+  white-space: nowrap; min-width: 70px; text-align: center;
+  color: var(--white);
+}
+
+/* ── KNOWLEDGE ── */
+#knowledge {
+  padding: 80px 24px;
+  background: rgba(57,255,20,0.02);
+  border-top: 1px solid rgba(57,255,20,0.08);
+  border-bottom: 1px solid rgba(57,255,20,0.08);
+}
+
+.knowledge-inner { max-width: 900px; margin: 0 auto; }
+
+.knowledge-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 2px; margin-top: 32px;
+}
+
+.know-card {
+  padding: 24px 22px;
+  background: rgba(57,255,20,0.03);
+  border: 1px solid rgba(57,255,20,0.1);
+}
+
+.know-num {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 40px; color: rgba(57,255,20,0.15);
+  line-height: 1; margin-bottom: 10px;
+}
+
+.know-title { font-size: 14px; font-weight: 700; margin-bottom: 8px; color: var(--green); }
+.know-body { font-size: 12px; color: rgba(255,255,255,0.55); line-height: 1.8; }
+
+/* ── CTA BOTTOM ── */
+#cta {
+  padding: 120px 24px;
+  text-align: center;
+  position: relative; overflow: hidden;
+}
+
+#cta::before {
+  content: '🧟';
+  position: absolute;
+  font-size: 300px;
+  opacity: 0.03;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  user-select: none;
+}
+
+.cta-big {
+  font-family: 'Black Han Sans', sans-serif;
+  font-size: clamp(36px, 8vw, 72px);
+  line-height: 1.2; margin-bottom: 16px;
+}
+
+.cta-big em { color: var(--green); font-style: normal; }
+
+.cta-sub {
+  font-size: 14px; color: var(--gray);
+  margin-bottom: 40px; line-height: 1.8;
+}
+
+.cta-buttons {
+  display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;
+}
+
+.btn-primary {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: var(--green); color: #000;
+  text-decoration: none;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 20px; letter-spacing: 4px;
+  padding: 16px 36px; border-radius: 3px;
+  transition: all 0.2s;
+}
+.btn-primary:hover { transform: scale(1.04); box-shadow: 0 0 40px rgba(57,255,20,0.4); }
+
+.btn-secondary {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: transparent; color: var(--white);
+  text-decoration: none;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 20px; letter-spacing: 4px;
+  padding: 16px 36px; border-radius: 3px;
+  border: 1px solid rgba(255,255,255,0.2);
+  transition: all 0.2s;
+}
+.btn-secondary:hover { border-color: rgba(255,255,255,0.5); background: rgba(255,255,255,0.05); }
+
+/* ── FOOTER ── */
+footer {
+  padding: 32px 24px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  text-align: center;
+  font-size: 11px; color: rgba(255,255,255,0.2);
+  letter-spacing: 2px;
+}
+footer a { color: rgba(57,255,20,0.4); text-decoration: none; }
+
+/* ── LANG TOGGLE ── */
+#langToggle {
+  position: fixed; top: 20px; right: 20px; z-index: 100;
+  background: rgba(6,6,8,0.9);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: var(--white); padding: 6px 14px;
+  border-radius: 3px; font-size: 11px; letter-spacing: 2px;
+  cursor: pointer; backdrop-filter: blur(8px);
+  transition: .15s;
+}
+#langToggle:hover { border-color: var(--green); color: var(--green); }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 600px) {
+  .meta-table { grid-template-columns: 1fr; }
+  .mt-cell.center { writing-mode: horizontal-tb; padding: 12px; }
+  .control-section { grid-template-columns: 1fr; }
+}
+
+/* ── ANIMATION REVEALS ── */
+.reveal {
+  opacity: 0; transform: translateY(24px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.reveal.visible { opacity: 1; transform: translateY(0); }
+</style>
+</head>
+<body>
+
+<button id="langToggle" onclick="toggleLang()">🌐 EN</button>
+
+<!-- ═══ HERO ═══ -->
+<section id="hero">
+  <div class="z" style="display:flex;flex-direction:column;align-items:center">
+    <div class="hero-alert" id="heroAlert">🚨 긴급재난경보 — 도시 침범 감지</div>
+    <h1 class="hero-title">
+      <span class="z-word">ZOMBIE</span>
+      <span class="e-word">EVAC</span>
+    </h1>
+    <p class="hero-subtitle" id="heroSub">재난 대피 생존 전략 게임 · 재난방지공학 박사 설계</p>
+    <a href="zombie-evac-v6.html" class="hero-cta" id="heroCta">
+      ▶ 지금 바로 플레이
+    </a>
+    <p class="hero-meta" id="heroMeta">
+      설치 없음 · 무료 · <a href="https://x.com/myungraekim" target="_blank">@myungraekim</a> · Claude + Three.JS
+    </p>
+  </div>
+  <div class="scroll-hint z">
+    <span id="scrollHint">스크롤</span>
+    <span>▼</span>
+  </div>
+</section>
+
+<!-- ═══ STORY ═══ -->
+<section id="story" class="z reveal">
+  <div class="section-label" id="storyLabel">STORY</div>
+  <h2 class="story-text" id="storyText">
+    좀비는 <em>재난</em>이다.<br>
+    히어로는 <em>당신</em>이다.<br>
+    대피소는 <em class="red">생명</em>이다.
+  </h2>
+  <p style="font-size:15px;color:rgba(255,255,255,0.55);line-height:2;max-width:600px;" id="storyBody">
+    이 게임의 좀비는 단순한 몬스터가 아닙니다.<br>
+    화재, 지진, 홍수, 폭발 — 재난이 도시를 삼키는 속도를 형상화한 것입니다.<br>
+    <strong style="color:var(--white)">당신의 임무는 시민을 대피소로 인도하는 것.</strong><br>
+    그것이 실제 재난에서 생존의 핵심입니다.
+  </p>
+
+  <!-- 대응표 -->
+  <div class="meta-table reveal" style="margin-top:48px">
+    <div class="mt-cell left">
+      <span class="mt-icon">🧟</span>
+      <div class="mt-label" id="mtLabel1">게임 속</div>
+      <div class="mt-name green">좀비</div>
+      <div class="mt-desc" id="mtDesc1">빠르게 확산<br>시민을 감염<br>경로 차단 필수</div>
+    </div>
+    <div class="mt-cell center" id="mtCenter">= 재난</div>
+    <div class="mt-cell right">
+      <span class="mt-icon">🔥</span>
+      <div class="mt-label" id="mtLabel2">현실 속</div>
+      <div class="mt-name red">재난</div>
+      <div class="mt-desc" id="mtDesc2">화재·지진·홍수<br>골든타임 3분<br>대피가 생존</div>
+    </div>
+  </div>
+
+  <div class="meta-table reveal" style="margin-top:2px">
+    <div class="mt-cell left">
+      <span class="mt-icon">🦸</span>
+      <div class="mt-label" id="mtLabel3">게임 속</div>
+      <div class="mt-name green">히어로</div>
+      <div class="mt-desc" id="mtDesc3">시민 구출<br>장애물로 경로 통제<br>대피소로 인도</div>
+    </div>
+    <div class="mt-cell center" id="mtCenter2">= 대응</div>
+    <div class="mt-cell right">
+      <span class="mt-icon">🚒</span>
+      <div class="mt-label" id="mtLabel4">현실 속</div>
+      <div class="mt-name red">재난대응관</div>
+      <div class="mt-desc" id="mtDesc4">주민 대피 유도<br>위험구역 차단<br>안전지대 확보</div>
+    </div>
+  </div>
+
+  <div class="meta-table reveal" style="margin-top:2px">
+    <div class="mt-cell left">
+      <span class="mt-icon">🏠</span>
+      <div class="mt-label" id="mtLabel5">게임 속</div>
+      <div class="mt-name green">대피소</div>
+      <div class="mt-desc" id="mtDesc5">3명 모아서 입장<br>도착하면 안전<br>위치를 미리 파악</div>
+    </div>
+    <div class="mt-cell center" id="mtCenter3">= 생존</div>
+    <div class="mt-cell right">
+      <span class="mt-icon">🏥</span>
+      <div class="mt-label" id="mtLabel6">현실 속</div>
+      <div class="mt-name red">안전지대</div>
+      <div class="mt-desc" id="mtDesc6">사전 위치 숙지<br>집결지 공유<br>질서 있는 대피</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ WAVES ═══ -->
+<section id="waves">
+  <div class="waves-inner z reveal">
+    <div class="section-label" id="wavesLabel">10 WAVE DISASTER SCENARIOS</div>
+    <h2 style="font-size:clamp(22px,4vw,36px);font-weight:900;line-height:1.3" id="wavesTitle">
+      화재에서 도시붕괴까지.<br>
+      <span style="color:var(--green)">10가지 재난</span>을 극복하라.
+    </h2>
+    <div class="wave-list">
+      <div class="wave-card" style="--bar-color:#39ff14">
+        <div class="wc-num">WAVE 1</div>
+        <div class="wc-type">🔥</div>
+        <div class="wc-title" id="wt1">아파트 화재</div>
+        <div class="wc-diff" style="background:rgba(57,255,20,0.1);color:#39ff14">EASY</div>
+      </div>
+      <div class="wave-card" style="--bar-color:#39ff14">
+        <div class="wc-num">WAVE 2</div>
+        <div class="wc-type">💨</div>
+        <div class="wc-title" id="wt2">가스 누출</div>
+        <div class="wc-diff" style="background:rgba(57,255,20,0.1);color:#39ff14">EASY</div>
+      </div>
+      <div class="wave-card" style="--bar-color:#ffd60a">
+        <div class="wc-num">WAVE 3</div>
+        <div class="wc-type">🌊</div>
+        <div class="wc-title" id="wt3">집중호우 침수</div>
+        <div class="wc-diff" style="background:rgba(255,214,10,0.1);color:#ffd60a">NORMAL</div>
+      </div>
+      <div class="wave-card" style="--bar-color:#ffd60a">
+        <div class="wc-num">WAVE 4</div>
+        <div class="wc-type">🌋</div>
+        <div class="wc-title" id="wt4">규모 5.8 지진</div>
+        <div class="wc-diff" style="background:rgba(255,214,10,0.1);color:#ffd60a">NORMAL</div>
+      </div>
+      <div class="wave-card" style="--bar-color:#ff8c00">
+        <div class="wc-num">WAVE 5</div>
+        <div class="wc-type">☢️</div>
+        <div class="wc-title" id="wt5">화학물질 누출</div>
+        <div class="wc-diff" style="background:rgba(255,140,0,0.1);color:#ff8c00">HARD</div>
+      </div>
+      <div class="wave-card" style="--bar-color:#ff8c00">
+        <div class="wc-num">WAVE 6</div>
+        <div class="wc-type">🌪️</div>
+        <div class="wc-title" id="wt6">초강력 태풍</div>
+        <div class="wc-diff" style="background:rgba(255,140,0,0.1);color:#ff8c00">HARD</div>
+      </div>
+      <div class="wave-card" style="--bar-color:#ff4d4d">
+        <div class="wc-num">WAVE 7</div>
+        <div class="wc-type">🔴</div>
+        <div class="wc-title" id="wt7">지진+화재 복합</div>
+        <div class="wc-diff" style="background:rgba(255,77,77,0.1);color:#ff4d4d">EXPERT</div>
+      </div>
+      <div class="wave-card" style="--bar-color:#ff4d4d">
+        <div class="wc-num">WAVE 8</div>
+        <div class="wc-type">💥</div>
+        <div class="wc-title" id="wt8">도심 대규모 폭발</div>
+        <div class="wc-diff" style="background:rgba(255,77,77,0.1);color:#ff4d4d">EXPERT</div>
+      </div>
+      <div class="wave-card" style="--bar-color:#a855f7">
+        <div class="wc-num">WAVE 9</div>
+        <div class="wc-type">🌊💥</div>
+        <div class="wc-title" id="wt9">쓰나미 경보</div>
+        <div class="wc-diff" style="background:rgba(168,85,247,0.1);color:#a855f7">NIGHTMARE</div>
+      </div>
+      <div class="wave-card" style="--bar-color:#a855f7">
+        <div class="wc-num">WAVE 10</div>
+        <div class="wc-type">🔴</div>
+        <div class="wc-title" id="wt10">도시 전체 위기</div>
+        <div class="wc-diff" style="background:rgba(168,85,247,0.1);color:#a855f7">NIGHTMARE</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ HOW TO PLAY ═══ -->
+<section id="howto" class="z reveal">
+  <div class="section-label" id="howLabel">HOW TO PLAY</div>
+  <h2 style="font-size:clamp(22px,4vw,36px);font-weight:900" id="howTitle">
+    전략이 생존을 결정한다
+  </h2>
+
+  <div class="mechanic-grid" style="margin-top:32px">
+    <div class="mechanic-card">
+      <span class="mc-icon">🦸</span>
+      <div class="mc-title" id="mc1t">히어로 이동</div>
+      <div class="mc-desc" id="mc1d">방향키 또는 하단 D패드로 이동. 시민에게 다가가면 자동 구출.</div>
+      <div class="mc-tip" id="mc1tip">💡 실제 재난 = 당황 말고 대피로 먼저!</div>
+    </div>
+    <div class="mechanic-card">
+      <span class="mc-icon">🧑</span>
+      <div class="mc-title" id="mc2t">시민 구출</div>
+      <div class="mc-desc" id="mc2d">접촉하거나 구출 버튼 → 줄줄이 따라옴. 3명 모으면 대피소로!</div>
+      <div class="mc-tip" id="mc2tip">💡 재난 시 혼자보다 함께 대피가 생존율 높음</div>
+    </div>
+    <div class="mechanic-card">
+      <span class="mc-icon">🏠</span>
+      <div class="mc-title" id="mc3t">대피소 입장</div>
+      <div class="mc-desc" id="mc3d">우측 하단 황금색 대피소. 3명 모아 올라가면 구출 완료!</div>
+      <div class="mc-tip" id="mc3tip">💡 대피소 위치 사전 파악이 골든타임을 지킴</div>
+    </div>
+    <div class="mechanic-card">
+      <span class="mc-icon">🚧</span>
+      <div class="mc-title" id="mc4t">장애물 설치</div>
+      <div class="mc-desc" id="mc4d">장애물 버튼으로 현 위치에 배리어 설치. 좀비 경로 차단!</div>
+      <div class="mc-tip" id="mc4tip">💡 재난 = 위험구역 차단이 피해 최소화 핵심</div>
+    </div>
+    <div class="mechanic-card">
+      <span class="mc-icon">🧟</span>
+      <div class="mc-title" id="mc5t">좀비 (재난)</div>
+      <div class="mc-desc" id="mc5d">시민을 먼저 노림. 닿으면 감염 → 좀비화. Wave마다 강해짐!</div>
+      <div class="mc-tip" id="mc5tip">💡 재난 = 초기 대응 실패 시 기하급수적 확산</div>
+    </div>
+    <div class="mechanic-card">
+      <span class="mc-icon">⏱</span>
+      <div class="mc-title" id="mc6t">골든타임</div>
+      <div class="mc-desc" id="mc6d">시간 초과 시 추가 좀비 출현. 빠른 대피가 생존을 결정!</div>
+      <div class="mc-tip" id="mc6tip">💡 실제 재난 골든타임 = 3분. 망설임이 죽음</div>
+    </div>
+  </div>
+
+  <!-- 조작법 -->
+  <div class="control-section reveal">
+    <div class="ctrl-box">
+      <div class="ctrl-title" id="ctrlPCTitle">PC 조작</div>
+      <div class="ctrl-list">
+        <div class="ctrl-item"><span class="ctrl-key">↑↓←→</span><span id="ctrlMove">캐릭터 이동</span></div>
+        <div class="ctrl-item"><span class="ctrl-key">SPACE</span><span id="ctrlRescue">시민 구출</span></div>
+        <div class="ctrl-item"><span class="ctrl-key">B</span><span id="ctrlBarrier">장애물 설치</span></div>
+      </div>
+    </div>
+    <div class="ctrl-box">
+      <div class="ctrl-title" id="ctrlMobileTitle">모바일 조작</div>
+      <div class="ctrl-list">
+        <div class="ctrl-item"><span class="ctrl-key">D-PAD</span><span id="ctrlMMove">캐릭터 이동</span></div>
+        <div class="ctrl-item"><span class="ctrl-key">구출 버튼</span><span id="ctrlMRescue">시민 구출</span></div>
+        <div class="ctrl-item"><span class="ctrl-key">🚧 버튼</span><span id="ctrlMBarrier">장애물 설치</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ KNOWLEDGE ═══ -->
+<section id="knowledge">
+  <div class="knowledge-inner z reveal">
+    <div class="section-label" id="knowLabel">DISASTER KNOWLEDGE</div>
+    <h2 style="font-size:clamp(22px,4vw,36px);font-weight:900;margin-bottom:8px" id="knowTitle">
+      게임하면서 배우는 재난 안전
+    </h2>
+    <p style="font-size:13px;color:var(--gray);margin-bottom:0" id="knowSub">
+      재난방지공학 박사가 실제 대피 원칙을 게임 메커닉에 녹여넣었습니다
+    </p>
+    <div class="knowledge-grid">
+      <div class="know-card">
+        <div class="know-num">01</div>
+        <div class="know-title" id="kn1t">골든타임 3분</div>
+        <div class="know-body" id="kn1b">재난 발생 후 3분이 생사를 가릅니다. 게임의 타이머가 바로 그것입니다.</div>
+      </div>
+      <div class="know-card">
+        <div class="know-num">02</div>
+        <div class="know-title" id="kn2t">대피소 사전 파악</div>
+        <div class="know-body" id="kn2b">재난 생존자의 공통점 — 평소에 대피소 위치를 알고 있었습니다.</div>
+      </div>
+      <div class="know-card">
+        <div class="know-num">03</div>
+        <div class="know-title" id="kn3t">집단 대피의 힘</div>
+        <div class="know-body" id="kn3b">혼자보다 3명이 함께 대피하면 생존율이 2배 이상 올라갑니다.</div>
+      </div>
+      <div class="know-card">
+        <div class="know-num">04</div>
+        <div class="know-title" id="kn4t">위험 경로 차단</div>
+        <div class="know-body" id="kn4b">바리케이드 = 재난 현장의 위험구역 차단. 확산을 막는 핵심 대응입니다.</div>
+      </div>
+      <div class="know-card">
+        <div class="know-num">05</div>
+        <div class="know-title" id="kn5t">재난 전파 속도</div>
+        <div class="know-body" id="kn5b">좀비 감염처럼 재난도 기하급수적으로 확산됩니다. 초기 대응이 전부입니다.</div>
+      </div>
+      <div class="know-card">
+        <div class="know-num">06</div>
+        <div class="know-title" id="kn6t">자신의 안전 최우선</div>
+        <div class="know-body" id="kn6b">히어로도 피격당합니다. 재난 현장 요원도 자신의 안전이 먼저입니다.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ CTA ═══ -->
+<section id="cta" class="z reveal">
+  <h2 class="cta-big" id="ctaBig">
+    재난은 예고 없이 온다.<br>
+    <em>대피는 연습이 필요하다.</em>
+  </h2>
+  <p class="cta-sub" id="ctaSub">
+    지금 플레이하고, 실제 재난 대피 방법을 몸으로 익혀보세요.<br>
+    무료 · 설치 없음 · 브라우저에서 바로
+  </p>
+  <div class="cta-buttons">
+    <a href="zombie-evac-v6.html" class="btn-primary" id="ctaPlay">▶ 지금 플레이</a>
+    <a href="https://x.com/myungraekim" target="_blank" class="btn-secondary" id="ctaX">𝕏 @myungraekim</a>
+  </div>
+</section>
+
+<footer>
+  <p>ZOMBIE EVAC · <a href="https://x.com/myungraekim">@myungraekim</a> · Built with Claude + Vibe Coding · 재난방지공학 박사 설계</p>
+</footer>
+
+<script>
+var lang='ko';
+var TX={
+  ko:{
+    heroAlert:'🚨 긴급재난경보 — 도시 침범 감지',
+    heroSub:'재난 대피 생존 전략 게임 · 재난방지공학 박사 설계',
+    heroCta:'▶ 지금 바로 플레이',
+    scrollHint:'스크롤',
+    storyLabel:'STORY',
+    storyText:'좀비는 <em>재난</em>이다.<br>히어로는 <em>당신</em>이다.<br>대피소는 <em class="red">생명</em>이다.',
+    storyBody:'이 게임의 좀비는 단순한 몬스터가 아닙니다.<br>화재, 지진, 홍수, 폭발 — 재난이 도시를 삼키는 속도를 형상화한 것입니다.<br><strong style="color:var(--white)">당신의 임무는 시민을 대피소로 인도하는 것.</strong><br>그것이 실제 재난에서 생존의 핵심입니다.',
+    mtLabel1:'게임 속',mtLabel2:'현실 속',mtLabel3:'게임 속',mtLabel4:'현실 속',mtLabel5:'게임 속',mtLabel6:'현실 속',
+    mtCenter:'= 재난',mtCenter2:'= 대응',mtCenter3:'= 생존',
+    mtDesc1:'빠르게 확산<br>시민을 감염<br>경로 차단 필수',
+    mtDesc2:'화재·지진·홍수<br>골든타임 3분<br>대피가 생존',
+    mtDesc3:'시민 구출<br>장애물로 경로 통제<br>대피소로 인도',
+    mtDesc4:'주민 대피 유도<br>위험구역 차단<br>안전지대 확보',
+    mtDesc5:'3명 모아서 입장<br>도착하면 안전<br>위치를 미리 파악',
+    mtDesc6:'사전 위치 숙지<br>집결지 공유<br>질서 있는 대피',
+    wavesLabel:'10 WAVE 재난 시나리오',
+    wavesTitle:'화재에서 도시붕괴까지.<br><span style="color:var(--green)">10가지 재난</span>을 극복하라.',
+    wt1:'아파트 화재',wt2:'가스 누출',wt3:'집중호우 침수',wt4:'규모 5.8 지진',wt5:'화학물질 누출',
+    wt6:'초강력 태풍',wt7:'지진+화재 복합',wt8:'도심 대규모 폭발',wt9:'쓰나미 경보',wt10:'도시 전체 위기',
+    howLabel:'HOW TO PLAY',howTitle:'전략이 생존을 결정한다',
+    mc1t:'히어로 이동',mc1d:'방향키 또는 하단 D패드로 이동. 시민에게 다가가면 자동 구출.',mc1tip:'💡 실제 재난 = 당황 말고 대피로 먼저!',
+    mc2t:'시민 구출',mc2d:'접촉하거나 구출 버튼 → 줄줄이 따라옴. 3명 모으면 대피소로!',mc2tip:'💡 재난 시 혼자보다 함께 대피가 생존율 높음',
+    mc3t:'대피소 입장',mc3d:'우측 하단 황금색 대피소. 3명 모아 올라가면 구출 완료!',mc3tip:'💡 대피소 위치 사전 파악이 골든타임을 지킴',
+    mc4t:'장애물 설치',mc4d:'장애물 버튼으로 현 위치에 배리어 설치. 좀비 경로 차단!',mc4tip:'💡 재난 = 위험구역 차단이 피해 최소화 핵심',
+    mc5t:'좀비 (재난)',mc5d:'시민을 먼저 노림. 닿으면 감염 → 좀비화. Wave마다 강해짐!',mc5tip:'💡 재난 = 초기 대응 실패 시 기하급수적 확산',
+    mc6t:'골든타임',mc6d:'시간 초과 시 추가 좀비 출현. 빠른 대피가 생존을 결정!',mc6tip:'💡 실제 재난 골든타임 = 3분. 망설임이 죽음',
+    ctrlPCTitle:'PC 조작',ctrlMobileTitle:'모바일 조작',
+    ctrlMove:'캐릭터 이동',ctrlRescue:'시민 구출',ctrlBarrier:'장애물 설치',
+    ctrlMMove:'캐릭터 이동',ctrlMRescue:'시민 구출',ctrlMBarrier:'장애물 설치',
+    knowLabel:'DISASTER KNOWLEDGE',
+    knowTitle:'게임하면서 배우는 재난 안전',
+    knowSub:'재난방지공학 박사가 실제 대피 원칙을 게임 메커닉에 녹여넣었습니다',
+    kn1t:'골든타임 3분',kn1b:'재난 발생 후 3분이 생사를 가릅니다. 게임의 타이머가 바로 그것입니다.',
+    kn2t:'대피소 사전 파악',kn2b:'재난 생존자의 공통점 — 평소에 대피소 위치를 알고 있었습니다.',
+    kn3t:'집단 대피의 힘',kn3b:'혼자보다 3명이 함께 대피하면 생존율이 2배 이상 올라갑니다.',
+    kn4t:'위험 경로 차단',kn4b:'바리케이드 = 재난 현장의 위험구역 차단. 확산을 막는 핵심 대응입니다.',
+    kn5t:'재난 전파 속도',kn5b:'좀비 감염처럼 재난도 기하급수적으로 확산됩니다. 초기 대응이 전부입니다.',
+    kn6t:'자신의 안전 최우선',kn6b:'히어로도 피격당합니다. 재난 현장 요원도 자신의 안전이 먼저입니다.',
+    ctaBig:'재난은 예고 없이 온다.<br><em>대피는 연습이 필요하다.</em>',
+    ctaSub:'지금 플레이하고, 실제 재난 대피 방법을 몸으로 익혀보세요.<br>무료 · 설치 없음 · 브라우저에서 바로',
+    ctaPlay:'▶ 지금 플레이',ctaX:'𝕏 @myungraekim',langBtn:'🌐 EN',
+  },
+  en:{
+    heroAlert:'🚨 EMERGENCY ALERT — Urban Disaster Detected',
+    heroSub:'Disaster Evacuation Strategy Game · Designed by Disaster Prevention PhD',
+    heroCta:'▶ PLAY NOW FREE',
+    scrollHint:'SCROLL',
+    storyLabel:'STORY',
+    storyText:'Zombies are <em>disasters</em>.<br>The hero is <em>you</em>.<br>The shelter is <em class="red">life</em>.',
+    storyBody:'The zombies in this game are not just monsters.<br>Fire, earthquake, flood, explosion — they represent the speed at which disaster consumes a city.<br><strong style="color:var(--white)">Your mission: guide citizens to the shelter.</strong><br>That is the core of survival in a real disaster.',
+    mtLabel1:'In the game',mtLabel2:'In reality',mtLabel3:'In the game',mtLabel4:'In reality',mtLabel5:'In the game',mtLabel6:'In reality',
+    mtCenter:'= Disaster',mtCenter2:'= Response',mtCenter3:'= Survival',
+    mtDesc1:'Spreads rapidly<br>Infects citizens<br>Route blocking essential',
+    mtDesc2:'Fire·Quake·Flood<br>3-minute golden time<br>Evacuation = survival',
+    mtDesc3:'Rescue citizens<br>Control routes with barriers<br>Lead to shelter',
+    mtDesc4:'Guide residents<br>Block danger zones<br>Secure safe areas',
+    mtDesc5:'Enter with 3 people<br>Safe on arrival<br>Know location in advance',
+    mtDesc6:'Know location ahead<br>Share rally points<br>Orderly evacuation',
+    wavesLabel:'10 WAVE DISASTER SCENARIOS',
+    wavesTitle:'From fire to city collapse.<br><span style="color:var(--green)">Survive 10 disasters.</span>',
+    wt1:'Apartment Fire',wt2:'Gas Leak',wt3:'Flash Flood',wt4:'M5.8 Earthquake',wt5:'Chemical Leak',
+    wt6:'Super Typhoon',wt7:'Quake+Fire',wt8:'Downtown Explosion',wt9:'Tsunami Warning',wt10:'Total City Crisis',
+    howLabel:'HOW TO PLAY',howTitle:'Strategy determines survival',
+    mc1t:'Move Hero',mc1d:'Arrow keys or D-pad to move. Touch a citizen to auto-rescue.',mc1tip:'💡 Real disaster = stay calm, find the exit first!',
+    mc2t:'Rescue Citizens',mc2d:'Touch or press rescue button → they follow. Gather 3 for shelter!',mc2tip:'💡 Evacuation in groups doubles survival rate',
+    mc3t:'Enter Shelter',mc3d:'Golden shelter at bottom-right. Gather 3 and step on it to evacuate!',mc3tip:'💡 Knowing shelter location keeps you in golden time',
+    mc4t:'Place Barriers',mc4d:'Barrier button places blockade at current position. Stops zombies!',mc4tip:'💡 Blocking danger routes minimizes disaster spread',
+    mc5t:'Zombies (Disaster)',mc5d:'Target citizens first. Contact = infection → zombie. Gets harder each wave!',mc5tip:'💡 Disasters spread exponentially on failed early response',
+    mc6t:'Golden Time',mc6d:'Extra zombies spawn on timeout. Fast evacuation saves lives!',mc6tip:'💡 Real golden time = 3 minutes. Hesitation is fatal',
+    ctrlPCTitle:'PC CONTROLS',ctrlMobileTitle:'MOBILE CONTROLS',
+    ctrlMove:'Move character',ctrlRescue:'Rescue citizen',ctrlBarrier:'Place barrier',
+    ctrlMMove:'Move character',ctrlMRescue:'Rescue citizen',ctrlMBarrier:'Place barrier',
+    knowLabel:'DISASTER KNOWLEDGE',
+    knowTitle:'Learn disaster safety while playing',
+    knowSub:'A disaster prevention PhD embedded real evacuation principles into every game mechanic',
+    kn1t:'3-Minute Golden Time',kn1b:'The 3 minutes after a disaster are life or death. The game timer is exactly that.',
+    kn2t:'Know Your Shelter',kn2b:'Survivors share one thing: they knew where the shelter was before disaster struck.',
+    kn3t:'Power of Group Evacuation',kn3b:'Evacuating with a group of 3+ more than doubles your survival rate.',
+    kn4t:'Block Danger Routes',kn4b:'Barriers = blocking danger zones in real disasters. Core to stopping spread.',
+    kn5t:'Disaster Spread Rate',kn5b:'Like zombie infection, disasters spread exponentially. Early response is everything.',
+    kn6t:'Your Safety First',kn6b:'Even heroes get hit. In disaster zones, responders must secure themselves first.',
+    ctaBig:'Disasters come without warning.<br><em>Evacuation needs practice.</em>',
+    ctaSub:'Play now and learn real disaster evacuation with your body.<br>Free · No install · Right in your browser',
+    ctaPlay:'▶ PLAY NOW',ctaX:'𝕏 @myungraekim',langBtn:'🌐 한',
+  }
+};
+
+function T(k){return (TX[lang]&&TX[lang][k]!==undefined)?TX[lang][k]:k;}
+
+function applyLang(){
+  var ids=['heroAlert','heroSub','heroCta','scrollHint',
+    'storyLabel','storyText','storyBody',
+    'mtLabel1','mtLabel2','mtLabel3','mtLabel4','mtLabel5','mtLabel6',
+    'mtCenter','mtCenter2','mtCenter3',
+    'mtDesc1','mtDesc2','mtDesc3','mtDesc4','mtDesc5','mtDesc6',
+    'wavesLabel','wavesTitle',
+    'wt1','wt2','wt3','wt4','wt5','wt6','wt7','wt8','wt9','wt10',
+    'howLabel','howTitle',
+    'mc1t','mc1d','mc1tip','mc2t','mc2d','mc2tip',
+    'mc3t','mc3d','mc3tip','mc4t','mc4d','mc4tip',
+    'mc5t','mc5d','mc5tip','mc6t','mc6d','mc6tip',
+    'ctrlPCTitle','ctrlMobileTitle',
+    'ctrlMove','ctrlRescue','ctrlBarrier',
+    'ctrlMMove','ctrlMRescue','ctrlMBarrier',
+    'knowLabel','knowTitle','knowSub',
+    'kn1t','kn1b','kn2t','kn2b','kn3t','kn3b',
+    'kn4t','kn4b','kn5t','kn5b','kn6t','kn6b',
+    'ctaBig','ctaSub','ctaPlay','ctaX'];
+  ids.forEach(function(id){
+    var el=document.getElementById(id);
+    if(el) el.innerHTML=T(id);
+  });
+  document.getElementById('langToggle').textContent=T('langBtn');
+  document.documentElement.lang=lang;
+}
+
+function toggleLang(){
+  lang=lang==='ko'?'en':'ko';
+  applyLang();
+}
+
+// Scroll reveal
+var reveals=document.querySelectorAll('.reveal');
+var observer=new IntersectionObserver(function(entries){
+  entries.forEach(function(e){
+    if(e.isIntersecting) e.target.classList.add('visible');
+  });
+},{threshold:0.1});
+reveals.forEach(function(el){observer.observe(el);});
+</script>
+</body>
+</html>
