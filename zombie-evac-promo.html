@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta property="og:title" content="ZOMBIE EVAC — 재난 대피 생존 게임">
-<meta property="og:description" content="재난방지공학 박사가 만든 실제 대피 알고리즘 기반 게임. 좀비는 재난이다.">
+<meta property="og:description" content="재난방재공학 박사가 만든 실제 대피 알고리즘 기반 게임. 좀비는 재난이다.">
 <title>ZOMBIE EVAC — 재난 대피 생존 게임</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Bebas+Neue&family=Noto+Sans+KR:wght@300;400;700;900&display=swap" rel="stylesheet">
@@ -503,11 +503,27 @@ footer a { color: rgba(57,255,20,0.4); text-decoration: none; }
       <span class="e-word">EVAC</span>
     </h1>
     <p class="hero-subtitle" id="heroSub">재난 대피 생존 전략 게임 · 재난방재공학 박사 설계</p>
-    <a href="zombie-evac-v6.html" class="hero-cta" id="heroCta">
+    <a href="game.html" class="hero-cta" id="heroCta">
       ▶ 지금 바로 플레이
     </a>
+    <div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;justify-content:center">
+      <a href="#howto" style="
+        font-size:13px;color:rgba(255,255,255,0.5);text-decoration:none;
+        border:1px solid rgba(255,255,255,0.15);padding:8px 18px;border-radius:4px;
+        letter-spacing:2px;transition:.15s;
+      " onmouseover="this.style.color='#fff';this.style.borderColor='rgba(255,255,255,0.4)'"
+         onmouseout="this.style.color='rgba(255,255,255,0.5)';this.style.borderColor='rgba(255,255,255,0.15)'"
+         id="howBtn">📖 게임 방법</a>
+      <a href="#waves" style="
+        font-size:13px;color:rgba(57,255,20,0.5);text-decoration:none;
+        border:1px solid rgba(57,255,20,0.15);padding:8px 18px;border-radius:4px;
+        letter-spacing:2px;transition:.15s;
+      " onmouseover="this.style.color='#39ff14';this.style.borderColor='rgba(57,255,20,0.4)'"
+         onmouseout="this.style.color='rgba(57,255,20,0.5)';this.style.borderColor='rgba(57,255,20,0.15)'"
+         id="scenBtn">🌊 10가지 재난</a>
+    </div>
     <p class="hero-meta" id="heroMeta">
-      설치 없음 · 무료 · <a href="https://x.com/myungraekim" target="_blank">@myungraekim</a> · Claude + Three.JS
+      설치 없음 · 무료 · <a href="https://x.com/aimyungrae" target="_blank">@aimyungrae</a> · Claude + Three.JS
     </p>
   </div>
   <div class="scroll-hint z">
@@ -729,7 +745,7 @@ footer a { color: rgba(57,255,20,0.4); text-decoration: none; }
       게임하면서 배우는 재난 안전
     </h2>
     <p style="font-size:13px;color:var(--gray);margin-bottom:0" id="knowSub">
-      재난방지공학 박사가 실제 대피 원칙을 게임 메커닉에 녹여넣었습니다
+      재난방재공학 박사가 실제 대피 원칙을 게임 메커닉에 녹여넣었습니다
     </p>
     <div class="knowledge-grid">
       <div class="know-card">
@@ -777,13 +793,13 @@ footer a { color: rgba(57,255,20,0.4); text-decoration: none; }
     무료 · 설치 없음 · 브라우저에서 바로
   </p>
   <div class="cta-buttons">
-    <a href="zombie-evac-v6.html" class="btn-primary" id="ctaPlay">▶ 지금 플레이</a>
-    <a href="https://x.com/myungraekim" target="_blank" class="btn-secondary" id="ctaX">𝕏 @myungraekim</a>
+    <a href="game.html" class="btn-primary" id="ctaPlay">▶ 지금 플레이</a>
+    <a href="https://x.com/aimyungrae" target="_blank" class="btn-secondary" id="ctaX">𝕏 @aimyungrae</a>
   </div>
 </section>
 
 <footer>
-  <p>ZOMBIE EVAC · <a href="https://x.com/myungraekim">@myungraekim</a> · Built with Claude + Vibe Coding · 재난방재공학 박사 설계</p>
+  <p>ZOMBIE EVAC · <a href="https://x.com/aimyungrae">@aimyungrae</a> · Built with Claude + Vibe Coding · 재난방재공학 박사 설계</p>
 </footer>
 
 <script>
@@ -791,8 +807,10 @@ var lang='ko';
 var TX={
   ko:{
     heroAlert:'🚨 긴급재난경보 — 도시 침범 감지',
-    heroSub:'재난 대피 생존 전략 게임 · 재난방지공학 박사 설계',
+    heroSub:'재난 대피 생존 전략 게임 · 재난방재공학 박사 설계',
     heroCta:'▶ 지금 바로 플레이',
+    howBtn:'📖 게임 방법',
+    scenBtn:'🌊 10가지 재난',
     scrollHint:'스크롤',
     storyLabel:'STORY',
     storyText:'좀비는 <em>재난</em>이다.<br>히어로는 <em>당신</em>이다.<br>대피소는 <em class="red">생명</em>이다.',
@@ -821,7 +839,7 @@ var TX={
     ctrlMMove:'캐릭터 이동',ctrlMRescue:'시민 구출',ctrlMBarrier:'장애물 설치',
     knowLabel:'DISASTER KNOWLEDGE',
     knowTitle:'게임하면서 배우는 재난 안전',
-    knowSub:'재난방지공학 박사가 실제 대피 원칙을 게임 메커닉에 녹여넣었습니다',
+    knowSub:'재난방재공학 박사가 실제 대피 원칙을 게임 메커닉에 녹여넣었습니다',
     kn1t:'골든타임 3분',kn1b:'재난 발생 후 3분이 생사를 가릅니다. 게임의 타이머가 바로 그것입니다.',
     kn2t:'대피소 사전 파악',kn2b:'재난 생존자의 공통점 — 평소에 대피소 위치를 알고 있었습니다.',
     kn3t:'집단 대피의 힘',kn3b:'혼자보다 3명이 함께 대피하면 생존율이 2배 이상 올라갑니다.',
@@ -830,12 +848,14 @@ var TX={
     kn6t:'자신의 안전 최우선',kn6b:'히어로도 피격당합니다. 재난 현장 요원도 자신의 안전이 먼저입니다.',
     ctaBig:'재난은 예고 없이 온다.<br><em>대피는 연습이 필요하다.</em>',
     ctaSub:'지금 플레이하고, 실제 재난 대피 방법을 몸으로 익혀보세요.<br>무료 · 설치 없음 · 브라우저에서 바로',
-    ctaPlay:'▶ 지금 플레이',ctaX:'𝕏 @myungraekim',langBtn:'🌐 EN',
+    ctaPlay:'▶ 지금 플레이',ctaX:'𝕏 @aimyungrae',langBtn:'🌐 EN',
   },
   en:{
     heroAlert:'🚨 EMERGENCY ALERT — Urban Disaster Detected',
     heroSub:'Disaster Evacuation Strategy Game · Designed by Disaster Prevention PhD',
     heroCta:'▶ PLAY NOW FREE',
+    howBtn:'📖 How to Play',
+    scenBtn:'🌊 10 Disasters',
     scrollHint:'SCROLL',
     storyLabel:'STORY',
     storyText:'Zombies are <em>disasters</em>.<br>The hero is <em>you</em>.<br>The shelter is <em class="red">life</em>.',
@@ -873,14 +893,14 @@ var TX={
     kn6t:'Your Safety First',kn6b:'Even heroes get hit. In disaster zones, responders must secure themselves first.',
     ctaBig:'Disasters come without warning.<br><em>Evacuation needs practice.</em>',
     ctaSub:'Play now and learn real disaster evacuation with your body.<br>Free · No install · Right in your browser',
-    ctaPlay:'▶ PLAY NOW',ctaX:'𝕏 @myungraekim',langBtn:'🌐 한',
+    ctaPlay:'▶ PLAY NOW',ctaX:'𝕏 @aimyungrae',langBtn:'🌐 한',
   }
 };
 
 function T(k){return (TX[lang]&&TX[lang][k]!==undefined)?TX[lang][k]:k;}
 
 function applyLang(){
-  var ids=['heroAlert','heroSub','heroCta','scrollHint',
+  var ids=['heroAlert','heroSub','heroCta','scrollHint','howBtn','scenBtn',
     'storyLabel','storyText','storyBody',
     'mtLabel1','mtLabel2','mtLabel3','mtLabel4','mtLabel5','mtLabel6',
     'mtCenter','mtCenter2','mtCenter3',
