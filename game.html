@@ -434,7 +434,7 @@ function toggleLang(){
 // ══════════════════════════════════════
 // CONSTANTS & CANVAS
 // ══════════════════════════════════════
-var COLS=17,ROWS=13,TILE=28;
+var COLS=13,ROWS=11,TILE=36;
 var EMPTY=0,WALL=1,SOFT=2,SHELTER=3;
 var MAX_WAVES=10,MAX_FOLLOWERS=3;
 var MAX_BARRIERS_BASE=5;
@@ -446,10 +446,10 @@ function resize(){
   var hud=document.getElementById('hud').offsetHeight;
   var ctrl=document.getElementById('controls').offsetHeight;
   var avH=window.innerHeight-hud-ctrl;
-  var maxW=Math.min(window.innerWidth,480);
+  var maxW=Math.min(window.innerWidth,520);
   var tw=Math.floor(maxW/COLS);
   var th=Math.floor(avH/ROWS);
-  TILE=Math.max(18,Math.min(tw,th,36));
+  TILE=Math.max(28,Math.min(tw,th,48));
   canvas.width=COLS*TILE;canvas.height=ROWS*TILE;
 }
 resize();
@@ -1023,10 +1023,14 @@ function drawTile(r,c){
     }
     // 방향 화살표 — 화면에 항상 표시 (대피소가 보일 때)
   } else {
-    // 잔디 체크패턴
+    // 잔디 — 밝고 선명하게
     var dark=(r+c)%2===0;
-    ctx.fillStyle=dark?'#2d5a1e':'#347022';
+    ctx.fillStyle=dark?'#3a7a28':'#4a9a35';
     ctx.fillRect(x,y,TILE,TILE);
+    // 잔디 질감
+    ctx.fillStyle=dark?'rgba(0,0,0,0.08)':'rgba(255,255,255,0.05)';
+    ctx.fillRect(x,y+TILE-3,TILE,3);
+    ctx.fillRect(x+TILE-3,y,3,TILE);
   }
 }
 
@@ -1082,28 +1086,43 @@ function render(){
   G.citizens.forEach(function(cit){
     if(cit.rescued)return;
     if(cit.infected){
+      // 감염 시민 배경 (빨간 경고)
+      ctx.fillStyle='rgba(220,38,38,0.25)';
+      ctx.fillRect(cit.c*TILE+2,cit.r*TILE+2,TILE-4,TILE-4);
       drawCitizen(cit.r,cit.c,true,false);
-      // 감염 진행 바
+      // 감염 진행 바 — 머리 위에
       var pct=cit.infTimer/60;
-      ctx.fillStyle='rgba(255,50,50,.85)';
-      ctx.fillRect(cit.c*TILE+2,(cit.r+1)*TILE-5,Math.floor((TILE-4)*pct),4);
+      ctx.fillStyle='rgba(0,0,0,0.5)';
+      ctx.fillRect(cit.c*TILE+2,cit.r*TILE+1,TILE-4,5);
+      ctx.fillStyle='#ff2222';
+      ctx.fillRect(cit.c*TILE+2,cit.r*TILE+1,Math.floor((TILE-4)*pct),5);
     } else {
+      // 일반 시민 배경 (파란 안내)
+      ctx.fillStyle='rgba(56,189,248,0.15)';
+      ctx.fillRect(cit.c*TILE+2,cit.r*TILE+2,TILE-4,TILE-4);
       drawCitizen(cit.r,cit.c,false,cit.immune);
     }
   });
 
-  // followers
+  // followers — 초록 배경으로 구별
   G.followers.forEach(function(f,i){
+    ctx.fillStyle='rgba(57,255,20,0.2)';
+    ctx.fillRect(f.c*TILE+2,f.r*TILE+2,TILE-4,TILE-4);
+    ctx.strokeStyle='rgba(57,255,20,0.5)';
+    ctx.lineWidth=2;
+    ctx.strokeRect(f.c*TILE+2,f.r*TILE+2,TILE-4,TILE-4);
     drawCitizen(f.r,f.c,false,true);
     ctx.fillStyle='#fbbf24';
-    ctx.font='bold 7px "Press Start 2P",monospace';
+    ctx.font='bold 8px "Press Start 2P",monospace';
     ctx.textAlign='center'; ctx.strokeStyle='#000'; ctx.lineWidth=2;
-    ctx.strokeText(i+1,(f.c+.5)*TILE,(f.r+1)*TILE-2);
-    ctx.fillText(i+1,(f.c+.5)*TILE,(f.r+1)*TILE-2);
+    ctx.strokeText(i+1,(f.c+.5)*TILE,(f.r+1)*TILE-3);
+    ctx.fillText(i+1,(f.c+.5)*TILE,(f.r+1)*TILE-3);
   });
 
-  // zombies
+  // zombies — 빨간 위험 배경
   G.zombies.forEach(function(z){
+    ctx.fillStyle=z.super?'rgba(168,85,247,0.3)':'rgba(220,38,38,0.22)';
+    ctx.fillRect(z.c*TILE+1,z.r*TILE+1,TILE-2,TILE-2);
     drawZombie(z.r,z.c,z.super||false);
   });
 
@@ -1112,7 +1131,7 @@ function render(){
     var p=G.player;
     var dr=G.shelterR-p.r, dc=G.shelterC-p.c;
     var dist=Math.abs(dr)+Math.abs(dc);
-    ctx.fillStyle='rgba(251,191,36,0.12)';
+    ctx.fillStyle='rgba(251,191,36,0.15)';
     ctx.fillRect((G.shelterC-1)*TILE,(G.shelterR-1)*TILE,TILE*3,TILE*3);
     if(dist>1){
       var angle=Math.atan2(dr,dc);
@@ -1120,9 +1139,11 @@ function render(){
       ctx.save();
       ctx.translate(ax,ay);ctx.rotate(angle);
       ctx.fillStyle='#fbbf24';
-      ctx.font='bold 14px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
-      ctx.strokeStyle='#000';ctx.lineWidth=2;
+      ctx.font='bold 16px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.shadowColor='#fbbf24';ctx.shadowBlur=8;
+      ctx.strokeStyle='#000';ctx.lineWidth=3;
       ctx.strokeText('→',0,0);ctx.fillText('→',0,0);
+      ctx.shadowBlur=0;
       ctx.restore();
     }
   }
@@ -1132,14 +1153,25 @@ function render(){
     var p=G.player;
     var flash=G.hitFlash>0&&Math.floor(G.hitFlash/4)%2===0;
     if(!flash){
+      // 히어로 배경 후광 (항상 표시)
+      var heroGlow=Math.sin(Date.now()*0.005)*0.3+0.7;
+      ctx.fillStyle='rgba(96,165,250,'+heroGlow.toFixed(2)+')';
+      ctx.beginPath();
+      ctx.arc((p.c+.5)*TILE,(p.r+.5)*TILE,TILE*0.55,0,Math.PI*2);
+      ctx.fill();
       drawHero(p.r,p.c);
+      // 팔로워 수 표시
       if(G.followers.length>0){
         ctx.fillStyle='#fbbf24';
         ctx.font='bold 9px "Press Start 2P",monospace';ctx.textAlign='center';
         ctx.strokeStyle='#000';ctx.lineWidth=2;
-        ctx.strokeText('×'+G.followers.length,(p.c+1)*TILE-4,p.r*TILE+8);
-        ctx.fillText('×'+G.followers.length,(p.c+1)*TILE-4,p.r*TILE+8);
+        ctx.strokeText('×'+G.followers.length,(p.c+1)*TILE-2,p.r*TILE+6);
+        ctx.fillText('×'+G.followers.length,(p.c+1)*TILE-2,p.r*TILE+6);
       }
+    } else {
+      // 피격 시 빨간 번쩍임
+      ctx.fillStyle='rgba(255,0,0,0.4)';
+      ctx.fillRect(p.c*TILE,p.r*TILE,TILE,TILE);
     }
   }
 
