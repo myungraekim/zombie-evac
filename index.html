@@ -3,9 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta property="og:title" content="ZOMBIE EVAC — 재난 대피 생존 게임">
-<meta property="og:description" content="재난방재공학 박사가 만든 실제 대피 알고리즘 기반 게임. 좀비는 재난이다.">
-<title>ZOMBIE EVAC — 재난 대피 생존 게임</title>
+<meta property="og:title" content="ZOMBIE EVAC — 재난 대피 훈련 게임">
+<meta property="og:url" content="https://zombie-evac.vercel.app">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://zombie-evac.vercel.app/og-image.png">
+<meta property="og:description" content="좀비처럼 번지는 재난 속에서 시민을 구조하고 대피소로 인도하는 브라우저 기반 재난 대피 훈련 게임. 방재공학 박사 설계.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://zombie-evac.vercel.app/og-image.png">
+<meta property="og:description" content="방재공학 박사가 만든 실제 대피 알고리즘 기반 게임. 좀비는 재난이다.">
+<title>ZOMBIE EVAC — 재난 대피 훈련 게임</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Bebas+Neue&family=Noto+Sans+KR:wght@300;400;700;900&display=swap" rel="stylesheet">
 <style>
@@ -502,7 +508,7 @@ footer a { color: rgba(57,255,20,0.4); text-decoration: none; }
       <span class="z-word">ZOMBIE</span>
       <span class="e-word">EVAC</span>
     </h1>
-    <p class="hero-subtitle" id="heroSub">재난 대피 생존 전략 게임 · 재난방재공학 박사 설계</p>
+    <p class="hero-subtitle" id="heroSub">재난 대피 훈련 게임 · 방재공학 박사 설계</p>
     <a href="game.html" class="hero-cta" id="heroCta">
       ▶ 지금 바로 플레이
     </a>
@@ -523,7 +529,7 @@ footer a { color: rgba(57,255,20,0.4); text-decoration: none; }
          id="scenBtn">🌊 10가지 재난</a>
     </div>
     <p class="hero-meta" id="heroMeta">
-      설치 없음 · 무료 · <a href="https://x.com/myungraekim" target="_blank">@myungraekim</a> · Claude + Three.JS
+      무료 · 설치 없음 · 브라우저에서 바로 플레이
     </p>
   </div>
   <div class="scroll-hint z">
@@ -712,7 +718,7 @@ footer a { color: rgba(57,255,20,0.4); text-decoration: none; }
       <span class="mc-icon">⏱</span>
       <div class="mc-title" id="mc6t">골든타임</div>
       <div class="mc-desc" id="mc6d">시간 초과 시 추가 좀비 출현. 빠른 대피가 생존을 결정!</div>
-      <div class="mc-tip" id="mc6tip">💡 실제 재난 골든타임 = 3분. 망설임이 죽음</div>
+      <div class="mc-tip" id="mc6tip">💡 초기 대응이 늦어질수록 위험은 빠르게 커집니다</div>
     </div>
   </div>
 
@@ -745,13 +751,13 @@ footer a { color: rgba(57,255,20,0.4); text-decoration: none; }
       게임하면서 배우는 재난 안전
     </h2>
     <p style="font-size:13px;color:var(--gray);margin-bottom:0" id="knowSub">
-      재난방지공학 박사가 실제 대피 원칙을 게임 메커닉에 녹여넣었습니다
+      방재공학 박사가 실제 대피 원칙을 게임 메커닉에 녹여넣었습니다
     </p>
     <div class="knowledge-grid">
       <div class="know-card">
         <div class="know-num">01</div>
         <div class="know-title" id="kn1t">골든타임 3분</div>
-        <div class="know-body" id="kn1b">재난 발생 후 3분이 생사를 가릅니다. 게임의 타이머가 바로 그것입니다.</div>
+        <div class="know-body" id="kn1b">재난 발생 직후의 빠른 판단과 이동이 생존 가능성을 높입니다. 게임의 타이머가 바로 그것입니다.</div>
       </div>
       <div class="know-card">
         <div class="know-num">02</div>
@@ -761,7 +767,7 @@ footer a { color: rgba(57,255,20,0.4); text-decoration: none; }
       <div class="know-card">
         <div class="know-num">03</div>
         <div class="know-title" id="kn3t">집단 대피의 힘</div>
-        <div class="know-body" id="kn3b">혼자보다 3명이 함께 대피하면 생존율이 2배 이상 올라갑니다.</div>
+        <div class="know-body" id="kn3b">혼자보다 집단 대피는 고립을 줄이고 질서 있는 이동을 돕습니다.</div>
       </div>
       <div class="know-card">
         <div class="know-num">04</div>
@@ -771,7 +777,7 @@ footer a { color: rgba(57,255,20,0.4); text-decoration: none; }
       <div class="know-card">
         <div class="know-num">05</div>
         <div class="know-title" id="kn5t">재난 전파 속도</div>
-        <div class="know-body" id="kn5b">좀비 감염처럼 재난도 기하급수적으로 확산됩니다. 초기 대응이 전부입니다.</div>
+        <div class="know-body" id="kn5b">일부 재난은 짧은 시간 안에 빠르게 확산될 수 있습니다. 초기 대응이 중요합니다.</div>
       </div>
       <div class="know-card">
         <div class="know-num">06</div>
@@ -789,17 +795,17 @@ footer a { color: rgba(57,255,20,0.4); text-decoration: none; }
     <em>대피는 연습이 필요하다.</em>
   </h2>
   <p class="cta-sub" id="ctaSub">
-    지금 플레이하고, 실제 재난 대피 방법을 몸으로 익혀보세요.<br>
+    게임을 통해 재난 대피 원리를 자연스럽게 익혀보세요.<br>
     무료 · 설치 없음 · 브라우저에서 바로
   </p>
   <div class="cta-buttons">
     <a href="game.html" class="btn-primary" id="ctaPlay">▶ 지금 플레이</a>
-    <a href="https://x.com/myungraekim" target="_blank" class="btn-secondary" id="ctaX">𝕏 @myungraekim</a>
+    <a href="https://x.com/aimyungrae" target="_blank" class="btn-secondary" id="ctaX">𝕏 @aimyungrae</a>
   </div>
 </section>
 
 <footer>
-  <p>ZOMBIE EVAC · <a href="https://x.com/myungraekim">@myungraekim</a> · Built with Claude + Vibe Coding · 재난방지공학 박사 설계</p>
+  <p>ZOMBIE EVAC · <a href="https://x.com/aimyungrae">@aimyungrae</a> · Built with Claude + Vibe Coding · 방재공학 박사 설계</p>
 </footer>
 
 <script>
@@ -807,7 +813,7 @@ var lang='ko';
 var TX={
   ko:{
     heroAlert:'🚨 긴급재난경보 — 도시 침범 감지',
-    heroSub:'재난 대피 생존 전략 게임 · 재난방지공학 박사 설계',
+    heroSub:'재난 대피 훈련 게임 · 방재공학 박사 설계',
     heroCta:'▶ 지금 바로 플레이',
     howBtn:'📖 게임 방법',
     scenBtn:'🌊 10가지 재난',
@@ -833,26 +839,26 @@ var TX={
     mc3t:'대피소 입장',mc3d:'우측 하단 황금색 대피소. 3명 모아 올라가면 구출 완료!',mc3tip:'💡 대피소 위치 사전 파악이 골든타임을 지킴',
     mc4t:'장애물 설치',mc4d:'장애물 버튼으로 현 위치에 배리어 설치. 좀비 경로 차단!',mc4tip:'💡 재난 = 위험구역 차단이 피해 최소화 핵심',
     mc5t:'좀비 (재난)',mc5d:'시민을 먼저 노림. 닿으면 감염 → 좀비화. Wave마다 강해짐!',mc5tip:'💡 재난 = 초기 대응 실패 시 기하급수적 확산',
-    mc6t:'골든타임',mc6d:'시간 초과 시 추가 좀비 출현. 빠른 대피가 생존을 결정!',mc6tip:'💡 실제 재난 골든타임 = 3분. 망설임이 죽음',
+    mc6t:'골든타임',mc6d:'시간 초과 시 추가 좀비 출현. 빠른 대피가 생존을 결정!',mc6tip:'💡 초기 대응이 늦어질수록 위험은 빠르게 커집니다',
     ctrlPCTitle:'PC 조작',ctrlMobileTitle:'모바일 조작',
     ctrlMove:'캐릭터 이동',ctrlRescue:'시민 구출',ctrlBarrier:'장애물 설치',
     ctrlMMove:'캐릭터 이동',ctrlMRescue:'시민 구출',ctrlMBarrier:'장애물 설치',
     knowLabel:'DISASTER KNOWLEDGE',
     knowTitle:'게임하면서 배우는 재난 안전',
-    knowSub:'재난방지공학 박사가 실제 대피 원칙을 게임 메커닉에 녹여넣었습니다',
-    kn1t:'골든타임 3분',kn1b:'재난 발생 후 3분이 생사를 가릅니다. 게임의 타이머가 바로 그것입니다.',
+    knowSub:'방재공학 박사가 실제 재난 대피 원칙을 게임 메커닉으로 구현했습니다',
+    kn1t:'골든타임 3분',kn1b:'재난 발생 직후의 빠른 판단과 이동이 생존 가능성을 높입니다. 게임의 타이머가 바로 그것입니다.',
     kn2t:'대피소 사전 파악',kn2b:'재난 생존자의 공통점 — 평소에 대피소 위치를 알고 있었습니다.',
-    kn3t:'집단 대피의 힘',kn3b:'혼자보다 3명이 함께 대피하면 생존율이 2배 이상 올라갑니다.',
+    kn3t:'집단 대피의 힘',kn3b:'혼자보다 집단 대피는 고립을 줄이고 질서 있는 이동을 돕습니다.',
     kn4t:'위험 경로 차단',kn4b:'바리케이드 = 재난 현장의 위험구역 차단. 확산을 막는 핵심 대응입니다.',
-    kn5t:'재난 전파 속도',kn5b:'좀비 감염처럼 재난도 기하급수적으로 확산됩니다. 초기 대응이 전부입니다.',
+    kn5t:'재난 전파 속도',kn5b:'일부 재난은 짧은 시간 안에 빠르게 확산될 수 있습니다. 초기 대응이 중요합니다.',
     kn6t:'자신의 안전 최우선',kn6b:'히어로도 피격당합니다. 재난 현장 요원도 자신의 안전이 먼저입니다.',
     ctaBig:'재난은 예고 없이 온다.<br><em>대피는 연습이 필요하다.</em>',
-    ctaSub:'지금 플레이하고, 실제 재난 대피 방법을 몸으로 익혀보세요.<br>무료 · 설치 없음 · 브라우저에서 바로',
-    ctaPlay:'▶ 지금 플레이',ctaX:'𝕏 @myungraekim',langBtn:'🌐 EN',
+    ctaSub:'게임을 통해 재난 대피 원리를 자연스럽게 익혀보세요.<br>무료 · 설치 없음 · 브라우저에서 바로 플레이',
+    ctaPlay:'▶ 지금 플레이',ctaX:'𝕏 @aimyungrae',langBtn:'🌐 EN',
   },
   en:{
     heroAlert:'🚨 EMERGENCY ALERT — Urban Disaster Detected',
-    heroSub:'Disaster Evacuation Strategy Game · Designed by Disaster Prevention PhD',
+    heroSub:'Disaster Evacuation Training Game · Designed by a Disaster Prevention PhD',
     heroCta:'▶ PLAY NOW FREE',
     howBtn:'📖 How to Play',
     scenBtn:'🌊 10 Disasters',
@@ -884,16 +890,16 @@ var TX={
     ctrlMMove:'Move character',ctrlMRescue:'Rescue citizen',ctrlMBarrier:'Place barrier',
     knowLabel:'DISASTER KNOWLEDGE',
     knowTitle:'Learn disaster safety while playing',
-    knowSub:'A disaster prevention PhD embedded real evacuation principles into every game mechanic',
+    knowSub:'A disaster prevention PhD implemented real evacuation principles as game mechanics',
     kn1t:'3-Minute Golden Time',kn1b:'The 3 minutes after a disaster are life or death. The game timer is exactly that.',
     kn2t:'Know Your Shelter',kn2b:'Survivors share one thing: they knew where the shelter was before disaster struck.',
-    kn3t:'Power of Group Evacuation',kn3b:'Evacuating with a group of 3+ more than doubles your survival rate.',
+    kn3t:'Power of Group Evacuation',kn3b:'Group evacuation reduces isolation and helps members move more safely together.',
     kn4t:'Block Danger Routes',kn4b:'Barriers = blocking danger zones in real disasters. Core to stopping spread.',
-    kn5t:'Disaster Spread Rate',kn5b:'Like zombie infection, disasters spread exponentially. Early response is everything.',
+    kn5t:'Disaster Spread Rate',kn5b:'Some disasters can spread rapidly in a short time. Early response is critical.',
     kn6t:'Your Safety First',kn6b:'Even heroes get hit. In disaster zones, responders must secure themselves first.',
     ctaBig:'Disasters come without warning.<br><em>Evacuation needs practice.</em>',
-    ctaSub:'Play now and learn real disaster evacuation with your body.<br>Free · No install · Right in your browser',
-    ctaPlay:'▶ PLAY NOW',ctaX:'𝕏 @myungraekim',langBtn:'🌐 한',
+    ctaSub:'Play now and learn real disaster evacuation with your body.<br>Free · No install · Play now in your browser',
+    ctaPlay:'▶ PLAY NOW',ctaX:'𝕏 @aimyungrae',langBtn:'🌐 한',
   }
 };
 
