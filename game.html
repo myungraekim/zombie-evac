@@ -3,55 +3,57 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>ZOMBIE EVAC — 재난 대피 훈련 게임</title>
+<title>ZOMBIE EVAC</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Noto+Sans+KR:wght@400;700&display=swap');
-:root{
-  --green:#39ff14;--red:#ff3333;--yellow:#fbbf24;--blue:#38bdf8;
-  --purple:#a78bfa;--bg:#0a0a0f;--panel:rgba(10,10,15,0.95);
+:root {
+  --green:#39ff14; --red:#ff3333; --yellow:#fbbf24; --blue:#38bdf8;
+  --purple:#a78bfa; --bg:#0a0a0f; --panel:rgba(10,10,15,0.95);
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 body{background:var(--bg);color:#fff;font-family:'Noto Sans KR',sans-serif;
   overflow:hidden;height:100vh;height:100dvh;display:flex;flex-direction:column;
   align-items:center;touch-action:none;user-select:none}
 
-/* NAME SCREEN */
+/* ── NAME SCREEN ── */
 #nameScreen{
   position:fixed;inset:0;z-index:200;
   display:flex;flex-direction:column;align-items:center;justify-content:center;
   background:linear-gradient(135deg,#0a0a0f 0%,#0d1a0d 50%,#0a0a0f 100%);
   padding:20px;
 }
-.ns-logo{font-family:'Press Start 2P',monospace;font-size:30px;
+.ns-logo{font-family:'Press Start 2P',monospace;font-size:32px;
   color:var(--green);text-shadow:0 0 30px var(--green),3px 3px 0 #004400;
-  text-align:center;line-height:1.4;margin-bottom:4px}
+  text-align:center;line-height:1.4;margin-bottom:6px}
 .ns-logo em{color:#fff;font-style:normal}
-.ns-by{font-size:11px;color:rgba(255,255,255,.3);letter-spacing:1px;margin-bottom:12px;text-align:center}
-.ns-by a{color:rgba(57,255,20,.4);text-decoration:none}
-.ns-deco{font-size:26px;margin-bottom:12px;animation:float 2s ease-in-out infinite;text-align:center}
-@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.ns-by{font-size:11px;color:rgba(255,255,255,.35);letter-spacing:2px;margin-bottom:20px;text-align:center}
+.ns-by a{color:rgba(57,255,20,.5);text-decoration:none}
+/* 좀비 데코 */
+.ns-deco{font-size:28px;margin-bottom:14px;animation:float 2s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
 .ns-desc{font-size:13px;color:rgba(255,255,255,.7);text-align:center;
-  max-width:320px;line-height:1.8;margin-bottom:20px;font-weight:700}
+  max-width:340px;line-height:1.8;margin-bottom:22px;font-weight:700}
 .ns-desc em{color:var(--green);font-style:normal}
 .ns-input{
-  width:min(300px,88vw);padding:13px 16px;font-size:16px;border-radius:8px;
+  width:min(300px,88vw);padding:14px 18px;font-size:16px;border-radius:8px;
   border:2px solid rgba(255,255,255,.15);background:rgba(255,255,255,.08);
-  color:#fff;text-align:center;outline:none;margin-bottom:11px;
-  font-family:'Noto Sans KR',sans-serif;-webkit-appearance:none;transition:.2s;
+  color:#fff;text-align:center;outline:none;margin-bottom:12px;
+  font-family:'Noto Sans KR',sans-serif;-webkit-appearance:none;
+  transition:.2s;
 }
 .ns-input:focus{border-color:var(--green);background:rgba(57,255,20,.07)}
 .ns-input::placeholder{color:rgba(255,255,255,.3)}
 .ns-join{
-  width:min(300px,88vw);padding:13px;font-family:'Press Start 2P',monospace;
-  font-size:13px;letter-spacing:2px;background:var(--green);color:#000;
+  width:min(300px,88vw);padding:14px;font-family:'Press Start 2P',monospace;
+  font-size:14px;letter-spacing:2px;background:var(--green);color:#000;
   border:none;border-radius:8px;cursor:pointer;
-  box-shadow:0 5px 0 #006600,0 0 20px rgba(57,255,20,.3);
-  transition:.1s;margin-bottom:16px;touch-action:manipulation;
+  box-shadow:0 5px 0 #006600,0 0 20px rgba(57,255,20,.4);
+  transition:.1s;margin-bottom:18px;touch-action:manipulation;
 }
 .ns-join:active{transform:translateY(4px);box-shadow:0 1px 0 #006600}
-.ns-bottom{display:flex;gap:14px;font-size:11px;color:rgba(255,255,255,.3)}
-.ns-bottom span{cursor:pointer;touch-action:manipulation}
-.ns-bottom span:active{color:#fff}
+.ns-bottom{display:flex;gap:16px;font-size:11px;color:rgba(255,255,255,.3)}
+.ns-bottom span{cursor:pointer;transition:.15s;touch-action:manipulation}
+.ns-bottom span:hover,.ns-bottom span:active{color:#fff}
 .lang-indicator{
   position:fixed;top:10px;right:10px;z-index:300;
   background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);
@@ -59,87 +61,85 @@ body{background:var(--bg);color:#fff;font-family:'Noto Sans KR',sans-serif;
   touch-action:manipulation;
 }
 
-/* HUD */
+/* ── HUD ── */
 #hud{
   width:100%;max-width:480px;flex-shrink:0;
   display:flex;align-items:center;justify-content:space-between;
-  padding:4px 8px;background:#111;border-bottom:2px solid #333;
+  padding:5px 10px;background:#111;border-bottom:2px solid #333;
   font-family:'Press Start 2P',monospace;
 }
 .hud-item{display:flex;flex-direction:column;align-items:center;gap:1px}
-.hud-val{font-size:10px;line-height:1}
+.hud-val{font-size:11px;line-height:1}
 .hud-lbl{font-size:6px;color:#666;margin-top:1px}
 #hWave{color:var(--green)}
 #hLives{color:var(--red)}
 #hRescued{color:var(--yellow)}
 #hScore{color:var(--blue)}
 #hTimer{color:var(--purple)}
-#pauseBtn{
-  background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);
-  color:#fff;padding:3px 8px;border-radius:4px;cursor:pointer;font-size:12px;
-  font-family:'Press Start 2P',monospace;touch-action:manipulation;
-}
 
-/* CANVAS */
+/* ── CANVAS ── */
 #gc{display:block;image-rendering:pixelated;image-rendering:-moz-crisp-edges}
 
-/* CONTROLS */
+/* ── CONTROLS ── */
 #controls{
   width:100%;max-width:480px;flex-shrink:0;
   display:flex;align-items:center;justify-content:space-between;
-  padding:6px 12px;background:#111;border-top:2px solid #333;
+  padding:6px 14px;background:#111;border-top:2px solid #333;
   padding-bottom:calc(6px + env(safe-area-inset-bottom));
 }
 .dpad{position:relative;width:104px;height:104px}
 .dp{
-  position:absolute;width:33px;height:33px;
-  background:rgba(255,255,255,.12);border:2px solid rgba(255,255,255,.25);
-  border-radius:7px;display:flex;align-items:center;justify-content:center;
+  position:absolute;width:32px;height:32px;
+  background:rgba(255,255,255,.1);border:2px solid rgba(255,255,255,.2);
+  border-radius:6px;display:flex;align-items:center;justify-content:center;
   font-size:13px;cursor:pointer;touch-action:manipulation;
-  font-family:'Press Start 2P',monospace;transition:background .08s;
+  font-family:'Press Start 2P',monospace;transition:background .1s;
 }
-.dp:active,.dp.on{background:rgba(255,255,255,.45);transform:scale(.93)}
+.dp:active,.dp.on{background:rgba(255,255,255,.5);transform:scale(.92)}
 #dU{top:0;left:36px}#dD{bottom:0;left:36px}
 #dL{top:36px;left:0}#dR{top:36px;right:0}
-.dp-mid{position:absolute;top:36px;left:36px;width:33px;height:33px;
-  background:#2a2a2a;border-radius:4px;border:1px solid #444}
+.dp-mid{position:absolute;top:36px;left:36px;width:32px;height:32px;
+  background:#333;border-radius:4px;border:1px solid #555}
 
-.tip-box{font-size:9px;color:#aaa;text-align:center;line-height:2.1;
-  font-family:'Noto Sans KR',sans-serif;max-width:88px;font-weight:700}
+.tip-box{
+  font-size:9px;color:#aaa;text-align:center;line-height:2.2;
+  font-family:'Noto Sans KR',sans-serif;max-width:90px;font-weight:700;
+}
 .tip-box span{color:var(--yellow)}
 
-.act-col{display:flex;flex-direction:column;align-items:center;gap:5px}
-.act-row{display:flex;gap:6px;align-items:flex-end}
+.act-col{display:flex;flex-direction:column;align-items:center;gap:4px}
 .ab{
-  width:54px;height:54px;border-radius:50%;border:none;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;
-  touch-action:manipulation;transition:.1s;box-shadow:0 4px 0 rgba(0,0,0,.5);
-  font-size:18px;
+  width:60px;height:60px;border-radius:50%;border:none;cursor:pointer;
+  font-size:20px;display:flex;align-items:center;justify-content:center;
+  touch-action:manipulation;transition:.1s;
+  box-shadow:0 4px 0 rgba(0,0,0,.5);
 }
 .ab:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(0,0,0,.5)}
-#abBarrier{background:#f97316}
-#abBomb{background:#ef4444}
-#abRescue{background:var(--yellow);font-size:9px;color:#000;
-  font-family:'Press Start 2P',monospace;width:62px;border-radius:8px}
-.ab-lbl{font-size:6px;color:#888;font-family:'Noto Sans KR',sans-serif;font-weight:700}
+#abBarrier{background:#f97316;font-size:16px}
+#abBomb{background:#ef4444;font-size:18px}
+#abRescue{background:var(--yellow);font-size:10px;color:#000;
+  font-family:'Press Start 2P',monospace}
+.ab-lbl{font-size:7px;color:#888;font-family:'Noto Sans KR',sans-serif;font-weight:700}
 
-/* OVERLAYS */
+/* ── OVERLAYS ── */
 .ov{
   position:fixed;inset:0;z-index:100;
   display:flex;flex-direction:column;align-items:center;justify-content:center;
   background:rgba(0,0,0,.92);padding:20px;overflow-y:auto;
 }
-.ov-t{font-family:'Press Start 2P',monospace;font-size:22px;text-align:center;
-  line-height:1.5;margin-bottom:8px;}
-.ov-t.g{color:var(--green);text-shadow:3px 3px 0 #003300,0 0 18px var(--green)}
+.ov-t{
+  font-family:'Press Start 2P',monospace;font-size:24px;text-align:center;
+  line-height:1.5;margin-bottom:8px;
+}
+.ov-t.g{color:var(--green);text-shadow:3px 3px 0 #003300,0 0 20px var(--green)}
 .ov-t.r{color:var(--red);text-shadow:3px 3px 0 #330000}
 .ov-t.y{color:var(--yellow);text-shadow:3px 3px 0 #443300}
-.ov-sub{font-size:9px;color:#aaa;text-align:center;line-height:2;
+.ov-sub{font-size:10px;color:#aaa;text-align:center;line-height:2;
   margin:8px 0;max-width:300px;font-family:'Press Start 2P',monospace}
-.ov-score{font-size:11px;color:var(--yellow);margin:8px 0 14px;
+.ov-score{font-size:12px;color:var(--yellow);margin:8px 0 14px;
   font-family:'Press Start 2P',monospace}
 .ov-btn{
-  background:var(--green);color:#000;border:none;padding:10px 20px;
+  background:var(--green);color:#000;border:none;padding:11px 22px;
   font-family:'Press Start 2P',monospace;font-size:10px;cursor:pointer;
   border-radius:4px;box-shadow:0 4px 0 #006600;transition:.1s;margin:4px;
   touch-action:manipulation;
@@ -149,63 +149,78 @@ body{background:var(--bg);color:#fff;font-family:'Noto Sans KR',sans-serif;
 .ov-btn.r:active{box-shadow:0 1px 0 #880000}
 .ov-btn.y{background:var(--yellow);color:#000;box-shadow:0 4px 0 #7a4800}
 
-/* SCENARIO */
-.sc-box{background:#111;border:2px solid #333;border-radius:8px;padding:12px 16px;
-  max-width:310px;width:100%;margin-bottom:10px}
-.sc-tip{background:#001500;border:2px solid #003300;border-radius:8px;padding:10px 14px;
-  max-width:310px;width:100%;margin-bottom:14px}
-.wave-prev{background:#1a1500;border:2px solid #554400;border-radius:8px;
-  padding:10px 14px;max-width:300px;width:100%;margin-bottom:10px}
-.wave-prev-title{font-size:8px;color:var(--yellow);font-family:'Press Start 2P',monospace;margin-bottom:5px}
-.wave-prev-row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;
-  font-size:7px;color:#aaa;font-family:'Press Start 2P',monospace}
+/* HOW TO PLAY grid */
+.how-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;
+  margin:10px 0;max-width:340px;width:100%}
+.how-item{
+  background:#1a1a2e;border:2px solid #333;border-radius:7px;
+  padding:8px 10px;font-size:7px;color:#bbb;line-height:1.9;
+  font-family:'Press Start 2P',monospace;
+}
+.how-item b{color:var(--green);display:block;margin-bottom:2px}
+
+/* WAVE PREVIEW */
+.wave-prev{
+  background:#1a1a2e;border:2px solid #333;border-radius:8px;
+  padding:10px 16px;margin:10px 0;text-align:center;width:100%;max-width:300px;
+}
+.wave-prev-title{font-size:8px;color:var(--yellow);font-family:'Press Start 2P',monospace;margin-bottom:6px}
+.wave-prev-row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;font-size:7px;
+  color:#aaa;font-family:'Press Start 2P',monospace}
 .wave-prev-row span{color:var(--red)}
 
-/* SITUATION BAR */
-#sitBar{display:none;position:fixed;top:40px;left:0;right:0;z-index:90;
-  background:rgba(10,10,10,.92);border-bottom:2px solid #444;
-  padding:4px 10px;font-size:11px;font-family:'Noto Sans KR',sans-serif;
-  color:#fff;text-align:center;line-height:1.5;backdrop-filter:blur(4px)}
-
-/* CURE HINT */
-#cureHint{display:none;position:fixed;bottom:78px;left:50%;transform:translateX(-50%);
-  z-index:91;background:rgba(251,191,36,.9);color:#000;
-  padding:5px 12px;border-radius:6px;font-size:11px;font-weight:700;
-  font-family:'Noto Sans KR',sans-serif;white-space:nowrap;pointer-events:none}
+/* SPEECH BUBBLE */
+.bubble{
+  position:fixed;z-index:150;pointer-events:none;
+  background:#fff;color:#000;border-radius:10px;padding:8px 12px;
+  font-size:10px;font-weight:700;font-family:'Noto Sans KR',sans-serif;
+  box-shadow:2px 2px 0 #333;max-width:180px;line-height:1.5;
+  animation:bubbleIn .2s ease;
+}
+.bubble::after{
+  content:'';position:absolute;bottom:-10px;left:14px;
+  border:5px solid transparent;border-top-color:#fff;
+}
+@keyframes bubbleIn{from{opacity:0;transform:scale(.8)}to{opacity:1;transform:scale(1)}}
 
 .hidden{display:none!important}
 </style>
 </head>
 <body>
 
-<button class="lang-indicator" id="langBtn" onclick="toggleLang()">EN</button>
+<button class="lang-indicator" id="langBtn" onclick="toggleLang()">🌐 EN</button>
 
 <!-- NAME SCREEN -->
 <div id="nameScreen">
-  <div class="ns-deco">🦸 🧟 🧑</div>
+  <div class="ns-deco">🦸‍♂️🧟🧟🧑</div>
   <div class="ns-logo">ZOMBIE<br><em>EVAC</em></div>
-  <div class="ns-by">by <a href="https://x.com/aimyungrae" target="_blank">@aimyungrae</a></div>
+  <div class="ns-by">by <a href="https://x.com/aimyungrae" target="_blank">@aimyungrae</a> · Claude · 2D</div>
   <div class="ns-desc" id="nsDesc">
-    좀비가 시민을 위협한다!<br>
+    좀비가 시민을 감염시킨다!<br>
     <em>슈퍼히어로</em>가 되어 시민을 구하라.<br>
-    장애물로 위험 경로를 차단하라!
+    장애물로 좀비를 막아라!
   </div>
   <input class="ns-input" id="nameInput" type="text" maxlength="14"
     placeholder="닉네임 입력..." onkeydown="if(event.key==='Enter')joinGame()"/>
-  <button class="ns-join" id="nsJoin" onclick="joinGame()">게임 시작</button>
+  <button class="ns-join" id="nsJoin" onclick="joinGame()">▶ 게임 시작</button>
   <div class="ns-bottom">
-    <span onclick="toggleLang()" id="nsLang">EN</span>
+    <span onclick="toggleLang()" id="nsLang">🌐 EN</span>
   </div>
 </div>
 
 <!-- HUD -->
 <div id="hud">
   <div class="hud-item"><div class="hud-val" id="hWave">W1</div><div class="hud-lbl" id="lWave">WAVE</div></div>
-  <div class="hud-item"><div class="hud-val" id="hLives">❤❤❤</div><div class="hud-lbl" id="lLives">LIVES</div></div>
+  <div class="hud-item"><div class="hud-val" id="hLives">❤️❤️❤️</div><div class="hud-lbl" id="lLives">LIVES</div></div>
   <div class="hud-item"><div class="hud-val" id="hRescued">0/0</div><div class="hud-lbl" id="lRescued">구출</div></div>
   <div class="hud-item"><div class="hud-val" id="hScore">0</div><div class="hud-lbl">SCORE</div></div>
-  <div class="hud-item"><div class="hud-val" id="hTimer">90</div><div class="hud-lbl" id="lTimer">TIME</div></div>
-  <button id="pauseBtn" onclick="togglePause()">II</button>
+  <div class="hud-item"><div class="hud-val" id="hTimer">60</div><div class="hud-lbl" id="lTimer">TIME</div></div>
+  <button onclick="togglePause()" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);
+    color:#fff;padding:4px 10px;border-radius:4px;cursor:pointer;font-size:13px;
+    font-family:'Press Start 2P',monospace;touch-action:manipulation" id="pauseBtn">⏸</button>
+  <button onclick="toggleMute()" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);
+    color:#fff;padding:4px 8px;border-radius:4px;cursor:pointer;font-size:13px;
+    touch-action:manipulation;margin-left:4px" id="muteBtn">🔊</button>
 </div>
 
 <canvas id="gc"></canvas>
@@ -220,12 +235,13 @@ body{background:var(--bg);color:#fff;font-family:'Noto Sans KR',sans-serif;
     <button class="dp" id="dD">▼</button>
   </div>
   <div class="tip-box" id="tipBox">
-    시민 옆<br><span>구출</span> 버튼!<br>
-    <span>3명</span>=대피소<br>
-    마지막도 OK
+    💣<span>아이템 줍기!</span><br>
+    시민 옆 → <span>구출</span><br>
+    <span>3명</span> → 대피소<br>
+    B키=폭탄
   </div>
   <div class="act-col">
-    <div class="act-row">
+    <div style="display:flex;gap:6px">
       <div style="display:flex;flex-direction:column;align-items:center;gap:2px">
         <button class="ab" id="abBarrier" onclick="placeBarrier()">🚧</button>
         <div class="ab-lbl" id="lBarrier">장애물</div>
@@ -235,48 +251,32 @@ body{background:var(--bg);color:#fff;font-family:'Noto Sans KR',sans-serif;
         <div class="ab-lbl" id="lBomb">폭탄</div>
       </div>
     </div>
-    <button class="ab" id="abRescue" onclick="tryRescue()" style="margin-top:2px">구출/해독</button>
-    <div class="ab-lbl" id="lRescue">RESCUE</div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:2px;margin-top:2px">
+      <button class="ab" id="abRescue" onclick="tryRescue()" style="width:70px;border-radius:8px">구출</button>
+      <div class="ab-lbl" id="lRescue">RESCUE (Z)</div>
+    </div>
   </div>
 </div>
-
-<div id="sitBar"></div>
-<div id="cureHint">💉 구출 버튼으로 해독 가능!</div>
 
 <!-- PAUSE -->
 <div class="ov hidden" id="ovPause">
-  <div class="ov-t g">PAUSE</div>
-  <div style="background:#111;border:2px solid #333;border-radius:10px;padding:14px 18px;
-    max-width:280px;width:100%;margin:12px 0;font-size:10px;color:#ccc;
-    font-family:'Noto Sans KR',sans-serif;line-height:2.3">
-    <div style="color:var(--yellow);font-weight:700;margin-bottom:8px">조작 방법</div>
-    <div>방향키 / D패드 — 이동</div>
-    <div><span style="color:var(--green)">구출/해독</span> — 시민 구출 + 감염 해독</div>
-    <div><span style="color:#f97316">🚧</span> — 장애물 (플레이어는 통과 가능)</div>
-    <div><span style="color:var(--red)">💣</span> — 폭탄 (벽 파괴, B키)</div>
-    <div style="color:var(--yellow);margin-top:6px">💡 마지막 시민도 대피 가능!</div>
-    <div style="color:#f97316">⚠ 감염 시민은 해독 버튼으로 구출!</div>
+  <div class="ov-t g">⏸ PAUSE</div>
+  <div style="background:#111;border:2px solid #333;border-radius:10px;padding:16px 20px;
+    margin:12px 0;max-width:280px;width:100%;font-size:10px;color:#aaa;
+    font-family:'Noto Sans KR',sans-serif;line-height:2.2;text-align:left">
+    <div style="color:#fbbf24;font-weight:700;margin-bottom:8px">🎮 조작 방법</div>
+    <div>↑↓←→ 또는 D패드 — 이동</div>
+    <div><span style="color:#39ff14">구출버튼/Z키</span> — 옆 시민 구출</div>
+    <div><span style="color:#f97316">🚧버튼</span> — 장애물 설치</div>
+    <div><span style="color:#ef4444">💣버튼/B키</span> — 폭탄 설치 (벽 파괴!)</div>
+    <div style="color:#fbbf24;margin-top:8px">💣 맵에 떨어진 폭탄 아이템 줍기!</div>
+    <div style="margin-top:8px;color:#38bdf8">🎯 모든 시민 구출 → 웨이브 클리어</div>
+    <div>3명 모으면 대피소로 이동!</div>
   </div>
   <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center">
-    <button class="ov-btn" onclick="togglePause()">계속하기</button>
-    <button class="ov-btn r" onclick="location.reload()">처음으로</button>
+    <button class="ov-btn" onclick="togglePause()">▶ 계속하기</button>
+    <button class="ov-btn r" onclick="location.reload()">🏠 처음으로</button>
   </div>
-</div>
-
-<!-- SCENARIO -->
-<div class="ov hidden" id="ovScenario">
-  <div id="scType" style="font-size:30px;text-align:center;margin-bottom:5px"></div>
-  <div class="ov-t g" id="scTitle" style="font-size:14px;line-height:1.5"></div>
-  <div class="sc-box"><div id="scDesc" style="font-size:11px;color:#ccc;line-height:2;font-family:'Noto Sans KR',sans-serif;white-space:pre-line;text-align:center"></div></div>
-  <div style="background:#1a1500;border:2px solid #554;border-radius:8px;padding:9px 13px;max-width:310px;width:100%;margin-bottom:8px">
-    <div style="font-size:7px;color:var(--yellow);font-family:'Press Start 2P',monospace;margin-bottom:4px">MISSION</div>
-    <div id="scMission" style="font-size:12px;color:#fff;font-family:'Noto Sans KR',sans-serif;font-weight:700"></div>
-  </div>
-  <div class="sc-tip">
-    <div style="font-size:7px;color:var(--green);font-family:'Press Start 2P',monospace;margin-bottom:4px">재난 TIP</div>
-    <div id="scTip" style="font-size:11px;color:#aaffaa;font-family:'Noto Sans KR',sans-serif;white-space:pre-line;line-height:1.8"></div>
-  </div>
-  <button class="ov-btn" id="scStartBtn" onclick="closeScenario()">작전 시작!</button>
 </div>
 
 <!-- WAVE CLEAR -->
@@ -284,157 +284,384 @@ body{background:var(--bg);color:#fff;font-family:'Noto Sans KR',sans-serif;
   <div class="ov-t y" id="ocTitle">WAVE 1 CLEAR!</div>
   <div class="ov-sub" id="ocSub"></div>
   <div class="wave-prev" id="ocPrev">
-    <div class="wave-prev-title" id="ocPrevTitle">다음 WAVE 예고</div>
+    <div class="wave-prev-title" id="ocPrevTitle">WAVE 2 예고</div>
     <div class="wave-prev-row" id="ocPrevRow"></div>
   </div>
   <div class="ov-score" id="ocScore"></div>
-  <button class="ov-btn" id="ocBtn" onclick="nextWave()">다음 WAVE</button>
+  <button class="ov-btn" onclick="nextWave()" id="ocBtn">NEXT WAVE →</button>
 </div>
 
 <!-- WIN -->
 <div class="ov hidden" id="ovWin">
-  <div class="ov-t y">MISSION COMPLETE!</div>
-  <div class="ov-sub" id="owSub">10웨이브 클리어!</div>
+  <div class="ov-t y">🏆 MISSION<br>COMPLETE!</div>
+  <div class="ov-sub" id="owSub">10웨이브 모두 클리어!</div>
   <div class="ov-score" id="owScore"></div>
-  <button class="ov-btn y" onclick="location.reload()">다시 시작</button>
+  <button class="ov-btn y" onclick="location.reload()" id="owBtn">▶ 다시 시작</button>
 </div>
 
 <!-- GAME OVER -->
 <div class="ov hidden" id="ovOver">
-  <div class="ov-t r">GAME OVER</div>
+  <div class="ov-t r">GAME<br>OVER</div>
   <div class="ov-sub" id="ooSub"></div>
   <div class="ov-score" id="ooScore"></div>
   <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center">
-    <button class="ov-btn r" onclick="retryWave()">재도전</button>
-    <button class="ov-btn" onclick="location.reload()">처음으로</button>
+    <button class="ov-btn r" onclick="retryWave()" id="ooRetry">재도전</button>
+    <button class="ov-btn" onclick="location.reload()" id="ooTitle">처음으로</button>
   </div>
 </div>
 
+<!-- SCENARIO INTRO -->
+<div class="ov hidden" id="ovScenario">
+  <div id="scType" style="font-size:32px;margin-bottom:6px;text-align:center"></div>
+  <div class="ov-t g" id="scTitle" style="font-size:15px;line-height:1.5;margin-bottom:10px;text-align:center"></div>
+  <div style="background:#111;border:2px solid #444;border-radius:8px;padding:12px 16px;
+    max-width:320px;width:100%;margin-bottom:10px">
+    <div id="scDesc" style="font-size:11px;color:#ccc;line-height:2;
+      font-family:'Noto Sans KR',sans-serif;white-space:pre-line;text-align:center"></div>
+  </div>
+  <div style="background:#1a1500;border:2px solid #554400;border-radius:8px;
+    padding:10px 14px;max-width:320px;width:100%;margin-bottom:10px">
+    <div style="font-size:8px;color:#fbbf24;margin-bottom:5px;
+      font-family:'Press Start 2P',monospace">🎯 MISSION</div>
+    <div id="scMission" style="font-size:12px;color:#fff;
+      font-family:'Noto Sans KR',sans-serif;font-weight:700;line-height:1.6"></div>
+  </div>
+  <div style="background:#001500;border:2px solid #003300;border-radius:8px;
+    padding:10px 14px;max-width:320px;width:100%;margin-bottom:16px">
+    <div style="font-size:8px;color:#39ff14;margin-bottom:5px;
+      font-family:'Press Start 2P',monospace">📚 재난 TIP</div>
+    <div id="scTip" style="font-size:11px;color:#aaffaa;
+      font-family:'Noto Sans KR',sans-serif;white-space:pre-line;line-height:1.8"></div>
+  </div>
+  <button class="ov-btn" id="scStartBtn" onclick="closeScenario()">▶ 작전 시작!</button>
+</div>
+
+<!-- SITUATION MESSAGE BAR -->
+<div id="sitBar" style="display:none;position:fixed;top:52px;left:0;right:0;z-index:90;
+  background:rgba(10,10,10,0.9);border-bottom:2px solid #444;
+  padding:5px 12px;font-size:11px;font-family:'Noto Sans KR',sans-serif;
+  color:#fff;text-align:center;line-height:1.6;backdrop-filter:blur(6px);
+  animation:slideDown .3s ease"></div>
+<style>
+@keyframes slideDown{from{transform:translateY(-100%);opacity:0}to{transform:translateY(0);opacity:1}}
+</style>
+
 <script>
 'use strict';
+
+// ══════════════════════════════════════
+// AUDIO SYSTEM (Web Audio API)
+// ══════════════════════════════════════
+var audioCtx = null;
+var audioBuffers = {};
+var bgmSource = null;
+var masterGain = null;
+var bgmGainNode = null;
+var sfxGainNode = null;
+var muted = false;
+var audioReady = false;
+
+function initAudio() {
+  if (audioCtx) return;
+  try {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    masterGain = audioCtx.createGain();
+    masterGain.gain.value = 1;
+    masterGain.connect(audioCtx.destination);
+    bgmGainNode = audioCtx.createGain();
+    bgmGainNode.gain.value = 0.55;
+    bgmGainNode.connect(masterGain);
+    sfxGainNode = audioCtx.createGain();
+    sfxGainNode.gain.value = 0.85;
+    sfxGainNode.connect(masterGain);
+    var files = ['title-bgm','game-bgm','rescue','shelter','bomb','hit','gameover'];
+    var loaded = 0;
+    files.forEach(function(name) {
+      fetch('audio/' + name + '.mp3')
+        .then(function(r) { return r.arrayBuffer(); })
+        .then(function(buf) { return audioCtx.decodeAudioData(buf); })
+        .then(function(decoded) {
+          audioBuffers[name] = decoded;
+          loaded++;
+          if (loaded === files.length) { audioReady = true; playBGM('title-bgm'); }
+        })
+        .catch(function() { loaded++; if (loaded === files.length) audioReady = true; });
+    });
+  } catch(e) {}
+}
+
+function playBGM(name) {
+  if (!audioCtx || !audioBuffers[name]) return;
+  stopBGM();
+  bgmSource = audioCtx.createBufferSource();
+  bgmSource.buffer = audioBuffers[name];
+  bgmSource.loop = true;
+  bgmSource.connect(bgmGainNode);
+  bgmSource.start(0);
+}
+
+function stopBGM() {
+  if (bgmSource) { try { bgmSource.stop(); } catch(e) {} bgmSource = null; }
+}
+
+function playSFX(name, duration) {
+  if (!audioCtx || !audioBuffers[name]) return;
+  var src = audioCtx.createBufferSource();
+  src.buffer = audioBuffers[name];
+  src.connect(sfxGainNode);
+  src.start(0, 0, duration || 2.5);
+}
+
+function toggleMute() {
+  muted = !muted;
+  if (masterGain) masterGain.gain.value = muted ? 0 : 1;
+  var btn = document.getElementById('muteBtn');
+  if (btn) btn.textContent = muted ? '🔇' : '🔊';
+}
+
+document.addEventListener('pointerdown', function() { initAudio(); }, {once: true});
+
 // ══════════════════════════════════════
 // LANGUAGE
 // ══════════════════════════════════════
-var lang='ko';
-var TX={
+var lang = 'ko';
+var TX = {
   ko:{
-    nsDesc:'좀비가 시민을 위협한다!<br><em>슈퍼히어로</em>가 되어 시민을 구하라.<br>장애물로 위험 경로를 차단하라!',
-    nsPlaceholder:'닉네임 입력...',nsJoin:'게임 시작',nsLang:'EN',
+    nsDesc:'좀비가 시민을 감염시킨다!<br><em>슈퍼히어로</em>가 되어 시민을 구하라.<br>장애물로 좀비를 막아라!',
+    nsPlaceholder:'닉네임 입력...',nsJoin:'▶ 게임 시작',nsHow:'게임 방법',
     lWave:'WAVE',lLives:'목숨',lRescued:'구출',lTimer:'시간',
-    lBarrier:'장애물',lBomb:'폭탄',lRescue:'RESCUE',
-    tipBox:'시민 옆<br><span>구출</span> 버튼!<br><span>3명</span>=대피소<br>마지막도 OK',
-    scStartBtn:'작전 시작!',
-    ocPrevTitle:'다음 WAVE 예고',ocBtn:'다음 WAVE',
-    owSub:'10웨이브 클리어!',
-    pauseContinue:'계속하기',pauseTitle:'처음으로',
-    logRescue:'구출! 따라와요!',logShelter:'대피 완료!',
-    logZombie:'위험! 이동하세요!',logBarrier:'장애물 설치',
-    logFull:'3명 완료! 대피소로!',logInfect:'감염 발생!',
-    logCure:'해독 성공!',logNoAP:'장애물 없음!',logBomb:'폭발!',
-    logNoBomb:'폭탄 없음!',logTimerWarn:'위험 증가 중!',
-    savedLabel:'구출',deadLabel:'희생',scoreLabel:'점수',gameOverSub:'도시를 지키지 못했습니다.',
-    cureHint:'💉 구출 버튼으로 해독 가능!',langBtn:'EN',
+    lBarrier:'장애물',lRescue:'구출',
+    tipBox:'<span>시민 옆</span><br>구출버튼!<br><br><span>3명</span>모으면<br>대피소↗',
+    howTitle:'게임 방법',howClose:'확인!',
+    how0:'🦸 나 (히어로)|방향키로 이동|시민 구출 임무!',
+    how1:'🧑 시민|접촉하면 따라옴|3명 모아 대피소로!',
+    how2:'🧟 좀비|시민을 먼저 노림|감염시키면 증가!',
+    how3:'🚧 장애물|좀비 경로 차단|개수 제한 있음!',
+    how4:'🏠 대피소|3명 모으면 즉시 소환|빨리 입장!',
+    how5:'💉 면역|시민에 닿으면 부여|좀비 접촉 차단!',
+    how6:'⏱ 타이머|시간 초과시 좀비|추가 출현!',
+    how7:'🎯 목표|모든 시민 구출하면|웨이브 클리어!',
+    ocPrevTitle:'다음 WAVE 예고',ocBtn:'NEXT WAVE →',
+    owSub:'10웨이브 모두 클리어!',owBtn:'▶ 다시 시작',
+    ooRetry:'재도전',ooTitle:'처음으로',
+    bubRescue:'구출! 따라와요!',bubShelter:'대피 완료! 💪',
+    bubZombie:'으악! 좀비다!',bubBarrier:'장애물 설치!',
+    bubFull:'3명 모였다! 대피소로!',bubInfect:'감염됐어!!',
+    bubNoAP:'장애물 없음!',bubLang:'EN',
+    waveLabel:'WAVE',zombieLabel:'좀비',citizenLabel:'시민',speedLabel:'속도',
+    fastLabel:'빠름',midLabel:'보통',slowLabel:'느림',
+    savedLabel:'구출',deadLabel:'희생',scoreLabel:'점수',
+    gameOverSub:'도시가 함락됐습니다...',
   },
   en:{
-    nsDesc:'Zombies threaten citizens!<br>Become the <em>superhero</em> and save them!<br>Block danger routes with barriers!',
-    nsPlaceholder:'Enter nickname...',nsJoin:'START GAME',nsLang:'KO',
+    nsDesc:'Zombies are infecting citizens!<br>Be the <em>Superhero</em> and save them!<br>Block zombies with barriers!',
+    nsPlaceholder:'Enter nickname...',nsJoin:'▶ START GAME',nsHow:'How to Play',
     lWave:'WAVE',lLives:'LIVES',lRescued:'SAVED',lTimer:'TIME',
-    lBarrier:'BARRIER',lBomb:'BOMB',lRescue:'RESCUE',
-    tipBox:'Near citizen:<br><span>Rescue!</span><br><span>3ppl</span>=shelter<br>last 1 OK',
-    scStartBtn:'START MISSION!',
-    ocPrevTitle:'NEXT WAVE PREVIEW',ocBtn:'NEXT WAVE',
-    owSub:'All 10 waves cleared!',
-    pauseContinue:'Continue',pauseTitle:'Title Screen',
-    logRescue:'Rescued! Follow me!',logShelter:'Evacuated!',
-    logZombie:'Danger! Move!',logBarrier:'Barrier placed',
-    logFull:'3 ready! To shelter!',logInfect:'Infection!',
-    logCure:'Cured!',logNoAP:'No barriers!',logBomb:'Explosion!',
-    logNoBomb:'No bombs!',logTimerWarn:'Danger increasing!',
-    savedLabel:'Saved',deadLabel:'Dead',scoreLabel:'Score',gameOverSub:'The city could not be protected.',
-    cureHint:'💉 Use Rescue button to cure!',langBtn:'KO',
+    lBarrier:'BARRIER',lRescue:'RESCUE',
+    tipBox:'<span>Near</span><br>citizen:<br>Rescue!<br><br><span>3 ppl</span>=<br>Shelter!',
+    howTitle:'HOW TO PLAY',howClose:'GOT IT!',
+    how0:'🦸 YOU (HERO)|Move with arrows|Rescue mission!',
+    how1:'🧑 CITIZEN|Touch to follow|Get 3 to shelter!',
+    how2:'🧟 ZOMBIE|Targets citizens|Spreads infection!',
+    how3:'🚧 BARRIER|Block zombie path|Limited supply!',
+    how4:'🏠 SHELTER|Spawns when 3 ready|Enter fast!',
+    how5:'💉 IMMUNE|Given on contact|Blocks infection!',
+    how6:'⏱ TIMER|Extra zombies|spawn on timeout!',
+    how7:'🎯 GOAL|Rescue all citizens|to clear wave!',
+    ocPrevTitle:'NEXT WAVE PREVIEW',ocBtn:'NEXT WAVE →',
+    owSub:'All 10 waves cleared!',owBtn:'▶ PLAY AGAIN',
+    ooRetry:'RETRY',ooTitle:'TITLE',
+    bubRescue:'Rescued! Follow me!',bubShelter:'Evacuated! 💪',
+    bubZombie:'Zombie!!',bubBarrier:'Barrier placed!',
+    bubFull:'3 ready! To shelter!',bubInfect:'Infected!!',
+    bubNoAP:'No barriers left!',bubLang:'한',
+    waveLabel:'WAVE',zombieLabel:'Zombies',citizenLabel:'Citizens',speedLabel:'Speed',
+    fastLabel:'Fast',midLabel:'Mid',slowLabel:'Slow',
+    savedLabel:'Saved',deadLabel:'Dead',scoreLabel:'Score',
+    gameOverSub:'The city has fallen...',
   }
 };
-function T(k){return(TX[lang]&&TX[lang][k]!==undefined)?TX[lang][k]:k;}
+function T(k){return(TX[lang]&&TX[lang][k]!==undefined)?TX[lang][k]:k}
+
 function applyLang(){
-  var el;
-  function set(id,val){el=document.getElementById(id);if(el)el.innerHTML=val;}
-  set('nsDesc',T('nsDesc'));
-  var inp=document.getElementById('nameInput');if(inp)inp.placeholder=T('nsPlaceholder');
-  set('nsJoin',T('nsJoin'));set('nsLang',T('nsLang'));
-  set('lWave',T('lWave'));set('lLives',T('lLives'));set('lRescued',T('lRescued'));
-  set('lTimer',T('lTimer'));set('lBarrier',T('lBarrier'));set('lBomb',T('lBomb'));
-  set('lRescue',T('lRescue'));set('tipBox',T('tipBox'));
-  set('scStartBtn',T('scStartBtn'));set('ocPrevTitle',T('ocPrevTitle'));
-  set('ocBtn',T('ocBtn'));set('owSub',T('owSub'));
-  set('cureHint',T('cureHint'));
-  set('langBtn',T('langBtn'));
+  document.getElementById('nsDesc').innerHTML=T('nsDesc');
+  document.getElementById('nameInput').placeholder=T('nsPlaceholder');
+  document.getElementById('nsJoin').textContent=T('nsJoin');
+  document.getElementById('nsHow').textContent=T('nsHow');
+  document.getElementById('nsLang').textContent='🌐 '+T('bubLang');
+  document.getElementById('langBtn').textContent='🌐 '+T('bubLang');
+  document.getElementById('lWave').textContent=T('lWave');
+  document.getElementById('lLives').textContent=T('lLives');
+  document.getElementById('lRescued').textContent=T('lRescued');
+  document.getElementById('lTimer').textContent=T('lTimer');
+  document.getElementById('lBarrier').textContent=T('lBarrier');
+  document.getElementById('lRescue').textContent=T('lRescue');
+  document.getElementById('tipBox').innerHTML=T('tipBox');
+  document.getElementById('howTitle').textContent=T('howTitle');
+  document.getElementById('howClose').textContent=T('howClose');
+  document.getElementById('ocPrevTitle').textContent=T('ocPrevTitle');
+  document.getElementById('ocBtn').textContent=T('ocBtn');
+  document.getElementById('owSub').textContent=T('owSub');
+  document.getElementById('owBtn').textContent=T('owBtn');
+  document.getElementById('ooRetry').textContent=T('ooRetry');
+  document.getElementById('ooTitle').textContent=T('ooTitle');
+  // How grid
+  var items=['how0','how1','how2','how3','how4','how5','how6','how7'];
+  var grid=document.getElementById('howGrid');
+  grid.innerHTML='';
+  items.forEach(function(k){
+    var parts=T(k).split('|');
+    var d=document.createElement('div');
+    d.className='how-item';
+    d.innerHTML='<b>'+parts[0]+'</b>'+(parts[1]||'')+'<br>'+(parts[2]||'');
+    grid.appendChild(d);
+  });
 }
-function toggleLang(){lang=lang==='ko'?'en':'ko';applyLang();}
+
+function toggleLang(){
+  lang=lang==='ko'?'en':'ko';
+  applyLang();
+}
 
 // ══════════════════════════════════════
-// CANVAS
+// CONSTANTS & CANVAS
 // ══════════════════════════════════════
 var COLS=13,ROWS=11,TILE=36;
 var EMPTY=0,WALL=1,SOFT=2,SHELTER=3;
 var MAX_WAVES=10,MAX_FOLLOWERS=3;
-var canvas=document.getElementById('gc');
-var ctx=canvas.getContext('2d');
+var MAX_BARRIERS_BASE=5;
 var G_PAUSED=false;
 
+var canvas=document.getElementById('gc');
+var ctx=canvas.getContext('2d');
+
 function resize(){
-  var hudH=document.getElementById('hud').offsetHeight;
-  var ctrlH=document.getElementById('controls').offsetHeight;
-  var avH=window.innerHeight-hudH-ctrlH;
-  var maxW=Math.min(window.innerWidth,500);
+  var hud=document.getElementById('hud').offsetHeight;
+  var ctrl=document.getElementById('controls').offsetHeight;
+  var avH=window.innerHeight-hud-ctrl;
+  var maxW=Math.min(window.innerWidth,520);
   var tw=Math.floor(maxW/COLS);
   var th=Math.floor(avH/ROWS);
-  TILE=Math.max(26,Math.min(tw,th,46));
+  TILE=Math.max(28,Math.min(tw,th,48));
   canvas.width=COLS*TILE;canvas.height=ROWS*TILE;
 }
 resize();
-window.addEventListener('resize',function(){resize();if(G&&G.running)render();});
+window.addEventListener('resize',function(){resize();if(G&&G.running)render()});
 
 // ══════════════════════════════════════
-// WAVE CONFIG
+// WAVE CONFIG (10 웨이브)
 // ══════════════════════════════════════
 var WAVES=[
-  {w:1,cit:5,zom:2,zSpd:9,soft:.14,barriers:6,timer:90,infRate:0.3,label:'EASY',
-   sc:{ko:{type:'🔥 화재',title:'아파트 화재 발생',
-     desc:'3층 주방에서 화재가 발생했습니다.\n연기가 복도를 채우고 있습니다.',
-     mission:'시민 5명을 대피소로 인도하세요!',
-     tip:'화재 시 엘리베이터 사용 금지!\n계단으로 낮은 자세를 유지하며 대피하세요.'},
-     en:{type:'🔥 FIRE',title:'Apartment Fire',
-     desc:'Fire broke out on the 3rd floor.\nSmoke is filling the hallways.',
-     mission:'Guide 5 citizens to the shelter!',
-     tip:'Never use elevators in a fire!\nStay low and use the stairs.'}},
-  },
-  {w:2,cit:6,zom:3,zSpd:8,soft:.16,barriers:5,timer:85,infRate:0.35,label:'EASY',
-   sc:{ko:{type:'💨 가스누출',title:'가스 누출 경보',desc:'지하 배관 가스 누출!\n폭발 위험 — 즉시 대피하세요.',mission:'6명을 골든타임 내 구출!',tip:'가스 누출 시 전기 스위치 금지!\n창문 열고 즉시 밖으로 대피하세요.'},
-       en:{type:'💨 GAS LEAK',title:'Gas Leak Alert',desc:'Gas leaking underground!\nExplosion risk — evacuate now.',mission:'Rescue 6 within golden time!',tip:'No electric switches during gas leak!\nOpen windows and evacuate immediately.'}}},
-  {w:3,cit:7,zom:4,zSpd:8,soft:.18,barriers:5,timer:80,infRate:0.4,label:'NORMAL',
-   sc:{ko:{type:'🌊 홍수',title:'집중호우 도시 침수',desc:'시간당 100mm 폭우!\n저지대 도로가 침수됩니다.',mission:'7명을 고지대 대피소로!',tip:'침수 구역 절대 진입 금지!\n차량 침수 시 창문으로 탈출하세요.'},
-       en:{type:'🌊 FLOOD',title:'Flash Flooding',desc:'100mm/hr rainfall!\nLow-lying roads are flooding.',mission:'Move 7 to highland shelter!',tip:'Never enter flood zones!\nEscape flooded cars through windows.'}}},
-  {w:4,cit:8,zom:5,zSpd:7,soft:.20,barriers:4,timer:75,infRate:0.45,label:'NORMAL',
-   sc:{ko:{type:'🌋 지진',title:'규모 5.8 지진 발생',desc:'강진이 도시를 강타했습니다.\n건물 붕괴 위험! 낙하물 주의.',mission:'8명을 안전지대로 대피!',tip:'지진 시 책상 아래 머리 보호!\n흔들림 멈추면 즉시 밖으로 대피하세요.'},
-       en:{type:'🌋 EARTHQUAKE',title:'M5.8 Earthquake',desc:'Strong quake hits the city.\nBuilding collapse risk!',mission:'Evacuate 8 citizens!',tip:'Cover head under a desk!\nEvacuate outside when shaking stops.'}}},
-  {w:5,cit:9,zom:7,zSpd:7,soft:.22,barriers:4,timer:70,infRate:0.5,label:'HARD',
-   sc:{ko:{type:'☢️ 화학사고',title:'독성 가스 누출',desc:'공장에서 독성 물질 유출!\n호흡기 보호 없이 노출 위험.',mission:'9명을 안전 반경 밖으로!',tip:'바람 방향 반대로 대피!\n입과 코를 막고 빠르게 이동하세요.'},
-       en:{type:'☢️ CHEM HAZARD',title:'Toxic Gas Leak',desc:'Toxic material from factory!\nExposure without protection is dangerous.',mission:'Evacuate 9 outside safe zone!',tip:'Move against wind direction!\nCover mouth and nose, move quickly.'}}},
-  {w:6,cit:10,zom:8,zSpd:6,soft:.22,barriers:4,timer:65,infRate:0.55,label:'HARD',
-   sc:{ko:{type:'🌪️ 태풍',title:'초강력 태풍 직격',desc:'최대 풍속 60m/s 태풍!\n유리창·간판 비산 위험.',mission:'10명을 내풍 대피소로!',tip:'태풍 시 유리창에서 멀리!\n욕실·내부 방이 가장 안전합니다.'},
-       en:{type:'🌪️ TYPHOON',title:'Super Typhoon',desc:'60m/s typhoon winds!\nGlass and signs flying.',mission:'Guide 10 to wind-safe shelter!',tip:'Stay away from windows!\nInner rooms are safest.'}}},
-  {w:7,cit:11,zom:10,zSpd:6,soft:.24,barriers:3,timer:60,infRate:0.6,label:'EXPERT',
-   sc:{ko:{type:'🔴 복합재난',title:'지진+화재 동시 발생',desc:'지진으로 가스관 파열 후 화재!\n두 재난이 동시 진행 중.',mission:'11명을 복합재난에서 구출!',tip:'복합재난 시 당황하지 마세요!\n대피 경로를 먼저 확인하고 이동하세요.'},
-       en:{type:'🔴 COMPOUND',title:'Quake + Fire',desc:'Gas pipe burst after quake!\nTwo disasters at once.',mission:'Rescue 11 from compound disaster!',tip:'Stay calm in compound disasters!\nIdentify escape route before moving.'}}},
-  {w:8,cit:12,zom:12,zSpd:5,soft:.25,barriers:3,timer:55,infRate:0.65,label:'EXPERT',
-   sc:{ko:{type:'💥 폭발',title:'도심 대규모 폭발',desc:'원인불명 폭발 발생!\n2차 폭발 위험 — 현장 접근 금지.',mission:'12명을 2차 폭발 전에 대피!',tip:'폭발 사고 시 창문으로 구경 금지!\n충격파로 유리 파편이 비산합니다.'},
-       en:{type:'💥 EXPLOSION',title:'Downtown Explosion',desc:'Unknown explosion occurs!\nSecondary explosion risk.',mission:'Evacuate 12 before secondary blast!',tip:'Never watch from windows!\nShockwaves send glass shards flying.'}}},
-  {w:9,cit:14,zom:14,zSpd:5,soft:.26,barriers:3,timer:50,infRate:0.7,label:'NIGHTMARE',
-   sc:{ko:{type:'🌊 쓰나미',title:'쓰나미 경보 발령',desc:'해안에서 쓰나미 감지!\n고지대로 즉시 대피하세요.',mission:'14명을 고지 대피소로!',tip:'쓰나미 경보 시 즉시 내륙 이동!\n파도가 보일 때까지 기다리면 위험합니다.'},
-       en:{type:'🌊 TSUNAMI',title:'Tsunami Warning',desc:'Tsunami detected offshore!\nMove to high ground now.',mission:'Move 14 to highland shelter!',tip:'Move inland immediately!\nDo not wait until you see the wave.'}}},
-  {w:10,cit:16,zom:16,zSpd:4,soft:.28,barriers:2,timer:45,infRate:0.75,label:'NIGHTMARE',
-   sc:{ko:{type:'🔴 도시붕괴',title:'최후의 재난',desc:'모든 재난이 동시 발생!\n마지막 대피 기회입니다.',mission:'최후의 16명을 반드시 구출하세요!',tip:'재난 생존자의 공통점:\n평소에 대피 경로를 알고 있었습니다.'},
-       en:{type:'🔴 COLLAPSE',title:'Final Disaster',desc:'All disasters at once!\nThis is the last chance.',mission:'You MUST rescue all 16 citizens!',tip:'Survivors share one thing:\nThey knew the evacuation route in advance.'}}},
+  {w:1, cit:5,  zom:2,  zSpd:8,  soft:.15, barriers:6, timer:90,  infRate:0.4, label:'EASY',
+   scenario:{
+     ko:{type:'🔥 화재',title:'아파트 화재 발생',
+       desc:'3층 주방에서 화재가 발생했습니다.\n연기가 복도를 채우고 있어요.\n초기 대응이 생존을 결정합니다.',
+       mission:'시민 5명을 대피소로 인도하라!',
+       tip:'💡 화재 시 엘리베이터 절대 금지!\n계단으로 낮은 자세로 대피하세요.'},
+     en:{type:'🔥 FIRE',title:'Apartment Fire Outbreak',
+       desc:'Fire broke out in the 3F kitchen.\nSmoke is filling the hallway.\nEarly response saves lives.',
+       mission:'Guide 5 citizens to the shelter!',
+       tip:'💡 Never use elevators in a fire!\nEvacuate low via stairs.'}
+   }},
+  {w:2, cit:6,  zom:3,  zSpd:7,  soft:.18, barriers:5, timer:80,  infRate:0.45,label:'EASY',
+   scenario:{
+     ko:{type:'💨 가스누출',title:'가스 누출 경보 발령',
+       desc:'지하 배관에서 가스가 누출됩니다.\n폭발 위험! 즉시 대피 필요.\n불꽃을 만들지 마세요.',
+       mission:'6명을 골든타임 내에 구출하라!',
+       tip:'💡 가스 누출 시 전기 스위치 건드리지 말것!\n창문 열고 즉시 건물 밖으로!'},
+     en:{type:'💨 GAS LEAK',title:'Gas Leak Alert Issued',
+       desc:'Gas leaking from underground pipes.\nExplosion risk! Immediate evacuation.\nNo open flames.',
+       mission:'Rescue 6 citizens within golden time!',
+       tip:'💡 Gas leak: do NOT touch electric switches!\nOpen windows and evacuate immediately!'}
+   }},
+  {w:3, cit:7,  zom:4,  zSpd:7,  soft:.20, barriers:5, timer:75,  infRate:0.5, label:'NORMAL',
+   scenario:{
+     ko:{type:'🌊 홍수',title:'집중호우 도시 침수',
+       desc:'시간당 100mm 폭우로 도로가 침수됩니다.\n저지대 주민 즉시 대피!\n침수 구역 절대 진입 금지.',
+       mission:'7명을 고지대 대피소로 이동시켜라!',
+       tip:'💡 침수 차량 탈출법: 물이 차오르면\n창문을 열고 탈출하세요!'},
+     en:{type:'🌊 FLOOD',title:'Heavy Rain Flooding City',
+       desc:'100mm/hr rain flooding roads.\nLow-lying residents evacuate now!\nNo entry into flood zones.',
+       mission:'Move 7 citizens to highland shelter!',
+       tip:'💡 Flooded car escape: as water rises,\nopen windows and escape!'}
+   }},
+  {w:4, cit:8,  zom:5,  zSpd:6,  soft:.22, barriers:4, timer:70,  infRate:0.55,label:'NORMAL',
+   scenario:{
+     ko:{type:'🌋 지진',title:'규모 5.8 지진 발생',
+       desc:'강진이 도시를 강타했습니다.\n건물 붕괴 위험! 낙하물 주의!\n머리를 보호하며 넓은 곳으로.',
+       mission:'8명을 안전지대로 대피시켜라!',
+       tip:'💡 지진 시 책상 아래 머리 보호!\n흔들림 멈추면 즉시 밖으로 대피!'},
+     en:{type:'🌋 EARTHQUAKE',title:'M5.8 Earthquake Strikes',
+       desc:'Strong quake has hit the city.\nBuilding collapse risk! Watch for debris!\nProtect head and move to open area.',
+       mission:'Evacuate 8 citizens to safety!',
+       tip:'💡 Earthquake: cover head under a desk!\nWhen shaking stops, evacuate outside!'}
+   }},
+  {w:5, cit:9,  zom:7,  zSpd:6,  soft:.23, barriers:4, timer:65,  infRate:0.6, label:'HARD',
+   scenario:{
+     ko:{type:'☢️ 화학사고',title:'화학공장 독성 누출',
+       desc:'인근 공장에서 독성 가스 누출!\n호흡기 보호 없이 노출 시 위험.\n바람 방향 반대로 대피하세요.',
+       mission:'9명을 안전 반경 밖으로 대피시켜라!',
+       tip:'💡 화학물질 누출 시 바람 방향 확인!\n입과 코를 막고 옆바람 방향으로 대피!'},
+     en:{type:'☢️ CHEM HAZARD',title:'Chemical Plant Toxic Leak',
+       desc:'Toxic gas leaking from nearby plant!\nExposure without protection is deadly.\nEvacuate against wind direction.',
+       mission:'Evacuate 9 citizens outside safe radius!',
+       tip:'💡 Chemical leak: check wind direction!\nCover mouth/nose, evacuate crosswind!'}
+   }},
+  {w:6, cit:10, zom:8,  zSpd:5,  soft:.25, barriers:4, timer:60,  infRate:0.65,label:'HARD',
+   scenario:{
+     ko:{type:'🌪️ 태풍',title:'초강력 태풍 직격',
+       desc:'최대 풍속 60m/s 태풍 상륙!\n유리창, 간판 날아다니는 중.\n절대 외출 금지, 대피소로!',
+       mission:'10명을 내풍 대피소로 인도하라!',
+       tip:'💡 태풍 시 유리창에서 멀리!\n욕실·창문 없는 방이 가장 안전합니다.'},
+     en:{type:'🌪️ TYPHOON',title:'Super Typhoon Direct Hit',
+       desc:'Typhoon with 60m/s winds landing!\nGlass and signs flying everywhere.\nNo going outside — to shelters!',
+       mission:'Guide 10 citizens to wind-proof shelter!',
+       tip:'💡 Typhoon: stay away from windows!\nBathrooms or inner rooms are safest.'}
+   }},
+  {w:7, cit:11, zom:10, zSpd:5,  soft:.25, barriers:3, timer:55,  infRate:0.7, label:'EXPERT',
+   scenario:{
+     ko:{type:'🔴 복합재난',title:'지진+화재 동시 발생',
+       desc:'지진으로 가스관 파열 → 화재 발생!\n두 재난이 동시에 진행 중입니다.\n빠른 판단만이 살길입니다.',
+       mission:'11명을 복합재난에서 구출하라!',
+       tip:'💡 복합재난 = 혼란 × 2!\n당황하지 말고 대피 경로를 먼저 확인하세요.'},
+     en:{type:'🔴 COMPOUND',title:'Earthquake + Fire Simultaneous',
+       desc:'Earthquake burst gas pipes → fire!\nTwo disasters at once.\nOnly fast judgment saves lives.',
+       mission:'Rescue 11 citizens from compound disaster!',
+       tip:'💡 Compound disaster = double chaos!\nStay calm and identify escape route first.'}
+   }},
+  {w:8, cit:12, zom:12, zSpd:4,  soft:.27, barriers:3, timer:50,  infRate:0.75,label:'EXPERT',
+   scenario:{
+     ko:{type:'💥 폭발',title:'도심 대규모 폭발',
+       desc:'원인불명 폭발로 도심 초토화!\n2차 폭발 위험 — 현장 접근 금지.\n부상자 발생, 즉각 대피 필요.',
+       mission:'12명을 2차 폭발 전에 대피시켜라!',
+       tip:'💡 폭발 사고 시 절대 창문으로 구경 금지!\n폭풍파로 유리 파편이 튑니다.'},
+     en:{type:'💥 EXPLOSION',title:'Downtown Massive Explosion',
+       desc:'Unknown explosion devastates downtown!\nSecondary explosion risk — no approach.\nCasualties reported, immediate evacuation.',
+       mission:'Evacuate 12 before secondary explosion!',
+       tip:'💡 Explosion: NEVER look through windows!\nShockwaves send glass shards flying.'}
+   }},
+  {w:9, cit:14, zom:14, zSpd:4,  soft:.28, barriers:3, timer:45,  infRate:0.8, label:'NIGHTMARE',
+   scenario:{
+     ko:{type:'🌊💥 쓰나미',title:'쓰나미 경보 — D-5분',
+       desc:'해안에서 쓰나미 감지!\n5분 후 도달 예정. 고지대로!\n해안가 절대 접근 금지.',
+       mission:'14명을 5분 안에 고지 대피소로!',
+       tip:'💡 쓰나미 경보 시 즉시 내륙 고지대로!\n파도가 올 때까지 기다리면 늦습니다!'},
+     en:{type:'🌊💥 TSUNAMI',title:'Tsunami Warning — T-5 min',
+       desc:'Tsunami detected offshore!\nETA 5 minutes. Move to high ground!\nAbsolutely no approach to coast.',
+       mission:'Move 14 to highland shelter in 5 min!',
+       tip:'💡 Tsunami warning: head inland uphill NOW!\nWaiting until you see the wave is too late!'}
+   }},
+  {w:10,cit:16, zom:16, zSpd:3,  soft:.30,  barriers:2, timer:40,  infRate:0.85,label:'NIGHTMARE',
+   scenario:{
+     ko:{type:'🔴 도시붕괴',title:'최악의 재난 — 도시 전체 위기',
+       desc:'모든 재난이 동시다발로 발생!\n정부 비상사태 선포.\n마지막 대피 기회입니다.',
+       mission:'최후의 16명을 반드시 구출하라!',
+       tip:'💡 재난에서 생존하는 사람들의 공통점:\n평소에 대피 경로를 알고 있었습니다!'},
+     en:{type:'🔴 CITY COLLAPSE',title:'Worst Disaster — Total City Crisis',
+       desc:'All disasters occurring simultaneously!\nGovernment declares emergency.\nThis is the last evacuation chance.',
+       mission:'You MUST rescue the final 16 citizens!',
+       tip:'💡 Survivors of disasters share one thing:\nThey knew the evacuation route in advance!'}
+   }},
 ];
 
 // ══════════════════════════════════════
@@ -444,54 +671,79 @@ var G={
   wave:1,lives:3,score:0,running:false,over:false,
   map:[],barriers:[],
   player:null,citizens:[],zombies:[],followers:[],
-  bombs:[],explosions:[],bombItems:[],
   rescued:0,totalCit:0,
-  barrierLeft:6,bombLeft:3,
+  barrierLeft:6,
   timer:90,timerTick:0,
-  shelterR:0,shelterC:0,
-  hitFlash:0,uid:0
+  shelterActive:true,shelterR:0,shelterC:0,
+  hitFlash:0,
+  uid:0
 };
-function newUID(){return ++G.uid;}
+function uid(){return ++G.uid}
 
 // ══════════════════════════════════════
-// SITUATION MESSAGE
+// SITUATION MESSAGE SYSTEM
 // ══════════════════════════════════════
 var sitTimer=null;
-var SIT={
+var SIT_MSGS={
   ko:{
-    rescue:['시민 구출! 대피소로 이동하세요.','빠른 대응! 계속 구출하세요.'],
-    shelter:['대피 완료! 신속한 대피가 핵심입니다.','안전지대 도착! 훌륭합니다.'],
-    barrier:['위험 경로 차단! 대피 동선 확보가 중요합니다.','장애물 설치 완료!'],
-    zombie_hit:['재난 노출! 자신의 안전을 먼저 확인하세요.','피해 발생. 무리한 행동은 위험합니다.'],
-    infect:['감염 발생! 초기 대응이 중요합니다.','위험 확산 중! 빠르게 해독하세요.'],
-    timer_warn:['초기 대응이 늦어질수록 위험이 커집니다!','빠른 판단과 대피가 핵심입니다.'],
-    low_lives:['위험! 자신의 안전을 먼저 챙기세요.','신중하게 행동하세요.'],
-    all_rescued:['전원 구출! 완벽한 대피 대응이었습니다!','모든 시민 안전 확보!'],
-    cure:['해독 성공! 시민이 회복됩니다.'],
+    rescue:['시민 구출! 대피소로 이동하세요!','골든타임! 빨리 대피소로!','잘 했어요! 계속 구출하세요!'],
+    shelter:['대피 성공! 재난 대피의 핵심은 빠른 행동입니다.','안전지대 도착! 대피소는 생명을 구합니다.','훌륭합니다! 실제 재난에서도 이렇게 행동하세요.'],
+    barrier:['바리케이드 설치! 재난 시 위험경로 차단이 중요합니다.','장애물로 재난 확산을 막았습니다!','경로 통제 완료! 대피로를 확보하세요.'],
+    zombie_hit:['재난에 노출됐습니다! 보호장비가 중요합니다.','피해를 입었습니다. 재난 시 무리한 행동은 금물!','부상! 재난 현장에서는 자신의 안전이 최우선입니다.'],
+    infect:['시민이 감염됐습니다! 재난 전파는 이렇게 빠릅니다.','전염 발생! 초기 대응이 얼마나 중요한지 보이죠?','재난 확산 중! 골든타임을 놓치지 마세요.'],
+    timer_warn:['시간이 부족합니다! 실제 재난의 골든타임은 3분!','서두르세요! 재난 대피는 시간이 생명입니다.','재난 악화 중! 더 많은 인원이 위험에 처했습니다.'],
+    low_lives:['위험! 재난 현장 요원도 자신의 안전을 먼저 챙기세요.','남은 기회가 얼마 없습니다. 신중하게 행동하세요!'],
+    all_rescued:['전원 구출! 완벽한 재난 대응이었습니다!','모든 시민이 안전합니다! 이것이 재난 대피의 목표입니다.'],
   },
   en:{
-    rescue:['Rescued! Head to shelter.','Quick response! Keep going.'],
-    shelter:['Evacuated! Fast action saves lives.','Reached safety!'],
-    barrier:['Danger route blocked!','Barrier placed.'],
-    zombie_hit:['Exposed! Check your own safety first.','Take damage. Avoid reckless actions.'],
-    infect:['Infection! Early response is critical.','Spread detected! Cure quickly.'],
-    timer_warn:['The longer response delays, the greater the risk!','Fast judgment is key.'],
-    low_lives:['Danger! Ensure your own safety first.','Act carefully.'],
-    all_rescued:['All rescued! Perfect evacuation response!','All citizens safe!'],
-    cure:['Cured! Citizen recovering.'],
+    rescue:['Citizen rescued! Head to the shelter!','Golden time! Get to the shelter fast!','Great work! Keep rescuing!'],
+    shelter:['Evacuation success! Fast action is key in disasters.','Reached safety! Shelters save lives.','Excellent! Act this way in a real disaster.'],
+    barrier:['Barrier placed! Blocking danger routes is critical.','Stopped disaster spread with a barrier!','Route controlled! Secure the evacuation path.'],
+    zombie_hit:['Exposed to disaster! Protective gear is vital.','Took damage. Reckless actions in disasters are dangerous!','Injured! Your own safety comes first in disaster zones.'],
+    infect:['Citizen infected! Disasters spread this fast.','Infection! See why early response matters?','Disaster spreading! Don\'t miss the golden time.'],
+    timer_warn:['Running out of time! Real disaster golden time = 3 min!','Hurry! In disasters, time is life.','Situation worsening! More people are at risk.'],
+    low_lives:['Danger! Even responders must ensure their own safety first.','Few chances left. Act carefully!'],
+    all_rescued:['All rescued! Perfect disaster response!','All citizens safe! This is the goal of evacuation.'],
   }
 };
+
 function sitMsg(key){
-  var msgs=SIT[lang][key];
+  var msgs=SIT_MSGS[lang][key];
   if(!msgs)return;
   var text=msgs[Math.floor(Math.random()*msgs.length)];
   var bar=document.getElementById('sitBar');
-  var sc=WAVES[G.wave-1].sc[lang];
-  var colors={shelter:'#39ff14',barrier:'#f97316',zombie_hit:'#ff4444',infect:'#ff4444',cure:'#39ff14'};
-  bar.innerHTML='<span style="color:'+(colors[key]||'#fbbf24')+'">'+sc.type+'</span> '+text;
+  var wconf=WAVES[G.wave-1];
+  var sc=wconf.scenario[lang];
+  bar.innerHTML='<span style="color:'+
+    (key==='shelter'?'#39ff14':key==='barrier'?'#f97316':key==='zombie_hit'||key==='infect'?'#ff4444':'#fbbf24')+
+    '">'+sc.type+'</span> '+text;
   bar.style.display='block';
   if(sitTimer)clearTimeout(sitTimer);
   sitTimer=setTimeout(function(){bar.style.display='none';},3000);
+}
+
+// ══════════════════════════════════════
+// SCENARIO INTRO
+// ══════════════════════════════════════
+function showScenario(){
+  var wconf=WAVES[G.wave-1];
+  var sc=wconf.scenario[lang];
+  document.getElementById('scType').textContent=sc.type;
+  document.getElementById('scTitle').textContent=sc.title;
+  document.getElementById('scDesc').textContent=sc.desc;
+  document.getElementById('scMission').textContent=sc.mission;
+  document.getElementById('scTip').textContent=sc.tip;
+  document.getElementById('scStartBtn').textContent=lang==='ko'?'▶ 작전 시작!':'▶ START MISSION!';
+  document.getElementById('ovScenario').classList.remove('hidden');
+}
+
+function closeScenario(){
+  document.getElementById('ovScenario').classList.add('hidden');
+  G.running=true;
+  lastT=performance.now();acc=0;
+  loopId=requestAnimationFrame(loop);
+  playBGM('game-bgm');
+  setTimeout(function(){sitMsg('rescue');},1500);
 }
 
 // ══════════════════════════════════════
@@ -510,24 +762,24 @@ function genMap(wconf){
       }
     }
   }
-  // 대피소 고정 (우측 하단)
-  G.shelterR=ROWS-2;G.shelterC=COLS-2;
+  // 대피소 — 우측 하단 고정, 항상 보임
+  G.shelterR=ROWS-2; G.shelterC=COLS-2;
   G.map[G.shelterR][G.shelterC]=SHELTER;
+  // 대피소 주변 길 확보
   G.map[G.shelterR][G.shelterC-1]=EMPTY;
   G.map[G.shelterR-1][G.shelterC]=EMPTY;
   G.map[G.shelterR-1][G.shelterC-1]=EMPTY;
+  G.shelterActive=true;
 }
 
-// 걷기 가능 여부 — player는 barrier 통과 가능
-function walkable(r,c,isPlayer){
+function walkable(r,c,ignoreSoft){
   if(r<0||r>=ROWS||c<0||c>=COLS)return false;
   var cell=G.map[r][c];
   if(cell===WALL)return false;
-  if(cell===SOFT)return false;
-  // 바리케이드: 플레이어/팔로워는 통과, 좀비는 차단
-  if(!isPlayer){
-    for(var i=0;i<G.barriers.length;i++)
-      if(G.barriers[i].r===r&&G.barriers[i].c===c)return false;
+  if(cell===SOFT&&!ignoreSoft)return false;
+  // 장애물 (대피소는 통과 가능)
+  for(var i=0;i<G.barriers.length;i++){
+    if(G.barriers[i].r===r&&G.barriers[i].c===c)return false;
   }
   return true;
 }
@@ -538,12 +790,13 @@ function walkable(r,c,isPlayer){
 function spawnWave(){
   var wconf=WAVES[G.wave-1];
   genMap(wconf);
-  G.player={r:1,c:1,id:newUID()};
+  G.player={r:1,c:1,dir:'right',id:uid()};
   G.followers=[];G.citizens=[];G.zombies=[];
-  G.bombs=[];G.explosions=[];G.bombItems=[];
-  G.rescued=0;G.hitFlash=0;
+  G.bombs=[];G.explosions=[];
+  G.rescued=0;
+  G.hitFlash=0;
   G.barrierLeft=wconf.barriers;
-  G.bombLeft=3+Math.floor(G.wave/3);
+  G.bombLeft=3+Math.floor(G.wave/3); // 웨이브마다 폭탄 증가
   G.timer=wconf.timer;G.timerTick=0;
 
   // 시민 배치
@@ -551,37 +804,314 @@ function spawnWave(){
   for(var r=1;r<ROWS-1;r++)for(var c=1;c<COLS-1;c++)
     if(G.map[r][c]===EMPTY&&!(r<=2&&c<=2))road.push({r:r,c:c});
   shuffle(road);
-  var citCount=Math.min(wconf.cit,road.length);
-  G.totalCit=citCount;
-  for(var i=0;i<citCount;i++)
-    G.citizens.push({
-      r:road[i].r,c:road[i].c,id:newUID(),
-      state:'normal', // normal|rescued|infected|cured|evacuated
-      infTimer:0,immune:false
-    });
+  for(var i=0;i<Math.min(wconf.cit,road.length);i++)
+    G.citizens.push({r:road[i].r,c:road[i].c,id:uid(),
+      infected:false,infTimer:0,rescued:false,immune:false});
+  G.totalCit=G.citizens.length;
 
-  // 좀비
+  // 좀비 배치 (테두리 근처)
   var edges=[];
   for(var r=1;r<ROWS-1;r++)for(var c=1;c<COLS-1;c++)
     if(G.map[r][c]===EMPTY&&(r>=ROWS-4||c>=COLS-4||c<=3)&&!(r<=2&&c<=2))
       edges.push({r:r,c:c});
   shuffle(edges);
   for(var i=0;i<Math.min(wconf.zom,edges.length);i++)
-    G.zombies.push({r:edges[i].r,c:edges[i].c,id:newUID(),spd:wconf.zSpd,tick:0,super:G.wave>=7&&i<2});
+    G.zombies.push({r:edges[i].r,c:edges[i].c,id:uid(),
+      spd:wconf.zSpd,tick:0,super:G.wave>=7&&i<2});
 
-  // 폭탄 아이템
+  // 💣 폭탄 아이템 맵에 배치 (줍기 가능)
+  G.bombItems=[];
+  var bombItemCount=2+Math.floor(G.wave/2); // 웨이브마다 증가
   var itemRoads=[];
   for(var r=2;r<ROWS-2;r++)for(var c=2;c<COLS-2;c++)
     if(G.map[r][c]===EMPTY&&!(r<=2&&c<=2))itemRoads.push({r:r,c:c});
   shuffle(itemRoads);
-  var bombItemCount=2+Math.floor(G.wave/2);
   for(var i=0;i<Math.min(bombItemCount,itemRoads.length);i++)
     G.bombItems.push({r:itemRoads[i].r,c:itemRoads[i].c,collected:false});
 }
 
 // ══════════════════════════════════════
-// DRAWING
+// PAUSE
 // ══════════════════════════════════════
+function togglePause(){
+  G_PAUSED=!G_PAUSED;
+  var btn=document.getElementById('pauseBtn');
+  if(G_PAUSED){
+    G.running=false;
+    if(btn)btn.textContent='▶';
+    document.getElementById('ovPause').classList.remove('hidden');
+  } else {
+    document.getElementById('ovPause').classList.add('hidden');
+    if(btn)btn.textContent='⏸';
+    G.running=true;
+    lastT=performance.now();acc=0;
+    loopId=requestAnimationFrame(loop);
+  }
+}
+
+// ══════════════════════════════════════
+// DRAW HELPERS
+// ══════════════════════════════════════
+function drawRect(r,c,color,alpha){
+  ctx.globalAlpha=alpha||1;
+  ctx.fillStyle=color;
+  ctx.fillRect(c*TILE,r*TILE,TILE,TILE);
+  ctx.globalAlpha=1;
+}
+
+function drawEmoji(r,c,emoji,scale){
+  scale=scale||0.72;
+  ctx.font=Math.floor(TILE*scale)+'px serif';
+  ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText(emoji,(c+.5)*TILE,(r+.5)*TILE);
+}
+
+// ── 픽셀아트 스타일 캐릭터 직접 그리기 ──
+function drawHero(r,c){
+  var x=c*TILE, y=r*TILE, T2=TILE;
+  var cx=x+T2/2, cy=y+T2/2;
+  var s=T2/32;
+
+  // 망토 (파란 영웅 망토)
+  ctx.fillStyle='#1e40af';
+  ctx.beginPath();
+  ctx.moveTo(cx-7*s, cy+2*s);
+  ctx.lineTo(cx-10*s, cy+14*s);
+  ctx.lineTo(cx+10*s, cy+14*s);
+  ctx.lineTo(cx+7*s, cy+2*s);
+  ctx.fill();
+
+  // 몸통 (빨간 슈퍼히어로 수트)
+  ctx.fillStyle='#dc2626';
+  ctx.fillRect(cx-6*s, cy-2*s, 12*s, 10*s);
+
+  // S자 엠블럼
+  ctx.fillStyle='#fbbf24';
+  ctx.font='bold '+Math.floor(8*s)+'px sans-serif';
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText('★', cx, cy+3*s);
+
+  // 머리
+  ctx.fillStyle='#fde68a';
+  ctx.beginPath();
+  ctx.arc(cx, cy-6*s, 6*s, 0, Math.PI*2);
+  ctx.fill();
+
+  // 머리카락 (검정)
+  ctx.fillStyle='#1a1a1a';
+  ctx.fillRect(cx-6*s, cy-12*s, 12*s, 5*s);
+  ctx.beginPath();
+  ctx.arc(cx, cy-9*s, 6*s, Math.PI, 0);
+  ctx.fill();
+
+  // 눈
+  ctx.fillStyle='#1e3a8a';
+  ctx.fillRect(cx-4*s, cy-7*s, 2.5*s, 2.5*s);
+  ctx.fillRect(cx+1.5*s, cy-7*s, 2.5*s, 2.5*s);
+
+  // 팔 (뻗은 자세)
+  ctx.fillStyle='#dc2626';
+  ctx.fillRect(cx-11*s, cy-2*s, 5*s, 3*s);
+  ctx.fillRect(cx+6*s, cy-2*s, 5*s, 3*s);
+
+  // 다리
+  ctx.fillStyle='#1e40af';
+  ctx.fillRect(cx-5*s, cy+8*s, 4*s, 6*s);
+  ctx.fillRect(cx+1*s, cy+8*s, 4*s, 6*s);
+
+  // 글로우 효과
+  ctx.shadowColor='#60a5fa';
+  ctx.shadowBlur=8*s;
+  ctx.beginPath();
+  ctx.arc(cx, cy-6*s, 6*s, 0, Math.PI*2);
+  ctx.strokeStyle='rgba(96,165,250,0.4)';
+  ctx.lineWidth=1.5*s;
+  ctx.stroke();
+  ctx.shadowBlur=0;
+}
+
+function drawZombie(r,c,isSuper){
+  var x=c*TILE, y=r*TILE, T2=TILE;
+  var cx=x+T2/2, cy=y+T2/2;
+  var s=T2/32;
+  var t=Date.now()*0.005;
+
+  // 몸통 (썩은 녹색)
+  ctx.fillStyle=isSuper?'#7e22ce':'#166534';
+  ctx.fillRect(cx-6*s, cy-2*s, 12*s, 11*s);
+
+  // 찢어진 옷 효과
+  ctx.fillStyle=isSuper?'#581c87':'#14532d';
+  ctx.fillRect(cx-6*s, cy+5*s, 4*s, 4*s);
+  ctx.fillRect(cx+2*s, cy+6*s, 4*s, 5*s);
+
+  // 머리 (울퉁불퉁)
+  ctx.fillStyle=isSuper?'#6b21a8':'#15803d';
+  ctx.beginPath();
+  ctx.arc(cx, cy-6*s, 6.5*s, 0, Math.PI*2);
+  ctx.fill();
+
+  // 눈 (빨간 광기)
+  var eyePulse=Math.sin(t)*0.5+0.5;
+  ctx.fillStyle=isSuper?`rgba(255,200,0,${0.7+eyePulse*0.3})`:`rgba(255,50,50,${0.7+eyePulse*0.3})`;
+  ctx.shadowColor=isSuper?'#ffd700':'#ff0000';
+  ctx.shadowBlur=4*s;
+  ctx.fillRect(cx-4.5*s, cy-8*s, 3*s, 3*s);
+  ctx.fillRect(cx+1.5*s, cy-8*s, 3*s, 3*s);
+  ctx.shadowBlur=0;
+
+  // 입 (이빨 드러냄)
+  ctx.fillStyle='#dc2626';
+  ctx.fillRect(cx-3*s, cy-3.5*s, 6*s, 2.5*s);
+  ctx.fillStyle='#fff';
+  for(var i=0;i<3;i++){
+    ctx.fillRect(cx-3*s+i*2*s, cy-3.5*s, 1.5*s, 2.5*s);
+  }
+
+  // 팔 (구부러진)
+  ctx.fillStyle=isSuper?'#7e22ce':'#166534';
+  ctx.fillRect(cx-11*s, cy-1*s, 5*s, 3*s);
+  ctx.fillRect(cx+6*s, cy-1*s, 5*s, 3*s);
+  // 손톱
+  ctx.fillStyle='#4ade80';
+  ctx.fillRect(cx-12*s, cy, 2*s, 2*s);
+  ctx.fillRect(cx+10*s, cy, 2*s, 2*s);
+
+  // 다리 (뒤뚱)
+  ctx.fillStyle=isSuper?'#581c87':'#14532d';
+  var legOff=Math.sin(t*3)*s;
+  ctx.fillRect(cx-5*s, cy+9*s, 4*s, 5*s+legOff);
+  ctx.fillRect(cx+1*s, cy+9*s, 4*s, 5*s-legOff);
+
+  // 슈퍼좀비 왕관
+  if(isSuper){
+    ctx.fillStyle='#ffd700';
+    ctx.beginPath();
+    ctx.moveTo(cx-5*s, cy-12*s);
+    ctx.lineTo(cx-3*s, cy-16*s);
+    ctx.lineTo(cx, cy-13*s);
+    ctx.lineTo(cx+3*s, cy-16*s);
+    ctx.lineTo(cx+5*s, cy-12*s);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  // 초록 글로우
+  ctx.shadowColor=isSuper?'#a855f7':'#4ade80';
+  ctx.shadowBlur=6*s;
+  ctx.beginPath();
+  ctx.arc(cx, cy-6*s, 7*s, 0, Math.PI*2);
+  ctx.strokeStyle=isSuper?'rgba(168,85,247,0.3)':'rgba(74,222,128,0.3)';
+  ctx.lineWidth=s;
+  ctx.stroke();
+  ctx.shadowBlur=0;
+}
+
+function drawCitizen(r,c,isInfected,isImmune){
+  var x=c*TILE, y=r*TILE, T2=TILE;
+  var cx=x+T2/2, cy=y+T2/2;
+  var s=T2/32;
+
+  if(isInfected){
+    // 감염 중 — 반 좀비
+    ctx.fillStyle='#854d0e';
+    ctx.fillRect(cx-5*s, cy-1*s, 10*s, 9*s);
+    ctx.fillStyle='rgba(74,222,128,0.6)';
+    ctx.fillRect(cx-5*s, cy-1*s, 10*s, 9*s);
+    ctx.fillStyle='#ca8a04';
+    ctx.beginPath();
+    ctx.arc(cx, cy-5*s, 5*s, 0, Math.PI*2);
+    ctx.fill();
+    ctx.fillStyle='rgba(255,0,0,0.7)';
+    ctx.fillRect(cx-3*s, cy-7*s, 2.5*s, 2.5*s);
+    ctx.fillRect(cx+0.5*s, cy-7*s, 2.5*s, 2.5*s);
+    return;
+  }
+
+  // 몸통 (다양한 색상)
+  var colors=['#2563eb','#7c3aed','#0891b2','#0f766e'];
+  var col=colors[Math.abs(r*7+c*3)%colors.length];
+  ctx.fillStyle=col;
+  ctx.fillRect(cx-5*s, cy-1*s, 10*s, 9*s);
+
+  // 머리
+  ctx.fillStyle='#fde68a';
+  ctx.beginPath();
+  ctx.arc(cx, cy-5.5*s, 5.5*s, 0, Math.PI*2);
+  ctx.fill();
+
+  // 눈
+  ctx.fillStyle='#1e293b';
+  ctx.fillRect(cx-3*s, cy-7*s, 2*s, 2*s);
+  ctx.fillRect(cx+1*s, cy-7*s, 2*s, 2*s);
+
+  // 면역 배지
+  if(isImmune){
+    ctx.fillStyle='#39ff14';
+    ctx.shadowColor='#39ff14';
+    ctx.shadowBlur=4*s;
+    ctx.beginPath();
+    ctx.arc(cx+5*s, cy-9*s, 3*s, 0, Math.PI*2);
+    ctx.fill();
+    ctx.shadowBlur=0;
+    ctx.fillStyle='#000';
+    ctx.font='bold '+Math.floor(4*s)+'px sans-serif';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText('✓', cx+5*s, cy-9*s);
+  }
+
+  // 팔
+  ctx.fillStyle=col;
+  ctx.fillRect(cx-9*s, cy, 4*s, 3*s);
+  ctx.fillRect(cx+5*s, cy, 4*s, 3*s);
+
+  // 다리
+  ctx.fillStyle='#475569';
+  ctx.fillRect(cx-4*s, cy+8*s, 3*s, 5*s);
+  ctx.fillRect(cx+1*s, cy+8*s, 3*s, 5*s);
+}
+
+// 폭탄 그리기
+function drawBombEntity(r,c,timer){
+  var x=c*TILE, y=r*TILE, T2=TILE;
+  var cx=x+T2/2, cy=y+T2/2;
+  var s=T2/32;
+  var blink=timer<15&&Math.floor(Date.now()/150)%2===0;
+
+  ctx.fillStyle=blink?'#ff4444':'#1a1a1a';
+  ctx.shadowColor=blink?'#ff4444':'transparent';
+  ctx.shadowBlur=blink?8*s:0;
+  ctx.beginPath();
+  ctx.arc(cx, cy+s, 9*s, 0, Math.PI*2);
+  ctx.fill();
+  ctx.shadowBlur=0;
+
+  // 도화선
+  ctx.strokeStyle=blink?'#ff6600':'#888';
+  ctx.lineWidth=2*s;
+  ctx.beginPath();
+  ctx.moveTo(cx+5*s, cy-7*s);
+  ctx.quadraticCurveTo(cx+10*s, cy-12*s, cx+7*s, cy-15*s);
+  ctx.stroke();
+
+  // 반짝이 (도화선 끝)
+  if(Math.floor(Date.now()/200)%2===0){
+    ctx.fillStyle='#ff8800';
+    ctx.shadowColor='#ff8800';
+    ctx.shadowBlur=5*s;
+    ctx.beginPath();
+    ctx.arc(cx+7*s, cy-15*s, 2*s, 0, Math.PI*2);
+    ctx.fill();
+    ctx.shadowBlur=0;
+  }
+
+  // 하이라이트
+  ctx.fillStyle='rgba(255,255,255,0.15)';
+  ctx.beginPath();
+  ctx.arc(cx-3*s, cy-2*s, 3*s, 0, Math.PI*2);
+  ctx.fill();
+}
+
 function drawTile(r,c){
   var x=c*TILE,y=r*TILE,cell=G.map[r][c];
   if(cell===WALL){
@@ -593,134 +1123,36 @@ function drawTile(r,c){
     ctx.fillStyle='#6b2a0a';
     ctx.fillRect(x+2,y+2,TILE-4,3);ctx.fillRect(x+2,y+TILE/2,TILE-4,3);
     ctx.fillRect(x+2,y+5,3,TILE/2-5);ctx.fillRect(x+TILE-5,y+5,3,TILE/2-5);
+    ctx.fillRect(x+TILE/2-1,y+TILE/2+3,3,TILE/2-5);
+    ctx.fillStyle='rgba(255,255,255,.08)';ctx.fillRect(x,y,TILE,2);ctx.fillRect(x,y,2,TILE);
   } else if(cell===SHELTER){
-    var p=Math.sin(Date.now()*0.006)*0.15+0.85;
+    // 대피소 — 밝은 황금색 바탕, 항상 보임
+    var pulse=Math.sin(Date.now()*0.006)*0.15+0.85;
     ctx.fillStyle='#d97706';ctx.fillRect(x,y,TILE,TILE);
-    ctx.fillStyle='rgba(251,191,36,'+p.toFixed(2)+')';ctx.fillRect(x+2,y+2,TILE-4,TILE-4);
-    ctx.font=Math.floor(TILE*0.62)+'px serif';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillStyle='rgba(251,191,36,'+pulse.toFixed(2)+')';
+    ctx.fillRect(x+2,y+2,TILE-4,TILE-4);
+    // 대피소 이모지
+    ctx.font=Math.floor(TILE*0.65)+'px serif';
+    ctx.textAlign='center';ctx.textBaseline='middle';
     ctx.fillText('🏠',(c+.5)*TILE,(r+.5)*TILE);
-    var hasFollower=G.followers.length>0||
-      (G.citizens.filter(function(ci){return ci.state==='rescued'||ci.state==='normal'}).length>0&&G.followers.length>0);
-    var ready=G.followers.length>0;
-    ctx.strokeStyle=ready?(Math.floor(Date.now()/250)%2===0?'#fff':'#fbbf24'):'#fbbf24';
-    ctx.lineWidth=ready?3:2;ctx.strokeRect(x+1,y+1,TILE-2,TILE-2);
-  } else {
-    ctx.fillStyle=(r+c)%2===0?'#3a7a28':'#4a9a35';
-    ctx.fillRect(x,y,TILE,TILE);
-  }
-}
-
-function drawHero(r,c){
-  var x=c*TILE,y=r*TILE,s=TILE/32,cx=x+TILE/2,cy=y+TILE/2;
-  // 후광
-  var gw=Math.sin(Date.now()*0.005)*0.3+0.7;
-  ctx.fillStyle='rgba(96,165,250,'+gw.toFixed(2)+')';
-  ctx.beginPath();ctx.arc(cx,cy,TILE*0.52,0,Math.PI*2);ctx.fill();
-  // 망토
-  ctx.fillStyle='#1e40af';
-  ctx.beginPath();ctx.moveTo(cx-7*s,cy+2*s);ctx.lineTo(cx-10*s,cy+13*s);
-  ctx.lineTo(cx+10*s,cy+13*s);ctx.lineTo(cx+7*s,cy+2*s);ctx.fill();
-  // 몸통
-  ctx.fillStyle='#dc2626';ctx.fillRect(cx-6*s,cy-2*s,12*s,10*s);
-  // 별
-  ctx.fillStyle='#fbbf24';ctx.font='bold '+Math.floor(8*s)+'px sans-serif';
-  ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('★',cx,cy+3*s);
-  // 머리
-  ctx.fillStyle='#fde68a';ctx.beginPath();ctx.arc(cx,cy-6*s,5.5*s,0,Math.PI*2);ctx.fill();
-  ctx.fillStyle='#1a1a1a';ctx.fillRect(cx-5.5*s,cy-11*s,11*s,5*s);
-  ctx.beginPath();ctx.arc(cx,cy-9*s,5.5*s,Math.PI,0);ctx.fill();
-  // 눈
-  ctx.fillStyle='#1e3a8a';ctx.fillRect(cx-4*s,cy-7.5*s,2.5*s,2.5*s);ctx.fillRect(cx+1.5*s,cy-7.5*s,2.5*s,2.5*s);
-  // 팔
-  ctx.fillStyle='#dc2626';ctx.fillRect(cx-11*s,cy-2*s,5*s,3*s);ctx.fillRect(cx+6*s,cy-2*s,5*s,3*s);
-  // 다리
-  ctx.fillStyle='#1e40af';ctx.fillRect(cx-5*s,cy+8*s,4*s,5*s);ctx.fillRect(cx+1*s,cy+8*s,4*s,5*s);
-}
-
-function drawZombie(r,c,isSuper){
-  var x=c*TILE,y=r*TILE,s=TILE/32,cx=x+TILE/2,cy=y+TILE/2,t=Date.now()*0.005;
-  ctx.fillStyle=isSuper?'rgba(168,85,247,0.3)':'rgba(220,38,38,0.22)';
-  ctx.fillRect(x+1,y+1,TILE-2,TILE-2);
-  ctx.fillStyle=isSuper?'#7e22ce':'#166534';
-  ctx.fillRect(cx-6*s,cy-2*s,12*s,11*s);
-  ctx.fillStyle=isSuper?'#6b21a8':'#15803d';
-  ctx.beginPath();ctx.arc(cx,cy-6*s,6.5*s,0,Math.PI*2);ctx.fill();
-  var ep=Math.sin(t)*0.5+0.5;
-  ctx.fillStyle=isSuper?'rgba(255,200,0,'+(0.7+ep*0.3)+')':'rgba(255,50,50,'+(0.7+ep*0.3)+')';
-  ctx.shadowColor=isSuper?'#ffd700':'#ff0000';ctx.shadowBlur=4*s;
-  ctx.fillRect(cx-4.5*s,cy-8*s,3*s,3*s);ctx.fillRect(cx+1.5*s,cy-8*s,3*s,3*s);
-  ctx.shadowBlur=0;
-  ctx.fillStyle='#dc2626';ctx.fillRect(cx-3*s,cy-3.5*s,6*s,2.5*s);
-  ctx.fillStyle='#fff';for(var i=0;i<3;i++)ctx.fillRect(cx-3*s+i*2*s,cy-3.5*s,1.5*s,2.5*s);
-  ctx.fillStyle=isSuper?'#7e22ce':'#166534';
-  ctx.fillRect(cx-11*s,cy-1*s,5*s,3*s);ctx.fillRect(cx+6*s,cy-1*s,5*s,3*s);
-  ctx.fillStyle='#4ade80';ctx.fillRect(cx-12*s,cy,2*s,2*s);ctx.fillRect(cx+10*s,cy,2*s,2*s);
-  var lo=Math.sin(t*3)*s;
-  ctx.fillStyle=isSuper?'#581c87':'#14532d';
-  ctx.fillRect(cx-5*s,cy+9*s,4*s,5*s+lo);ctx.fillRect(cx+1*s,cy+9*s,4*s,5*s-lo);
-  if(isSuper){
-    ctx.fillStyle='#ffd700';
-    ctx.beginPath();ctx.moveTo(cx-5*s,cy-12*s);ctx.lineTo(cx-3*s,cy-16*s);
-    ctx.lineTo(cx,cy-13*s);ctx.lineTo(cx+3*s,cy-16*s);ctx.lineTo(cx+5*s,cy-12*s);ctx.closePath();ctx.fill();
-  }
-}
-
-function drawCitizen(r,c,state){
-  var x=c*TILE,y=r*TILE,s=TILE/32,cx=x+TILE/2,cy=y+TILE/2;
-  // 배경색으로 상태 표시
-  if(state==='infected'){
-    ctx.fillStyle='rgba(220,38,38,0.3)';ctx.fillRect(x+2,y+2,TILE-4,TILE-4);
-  } else if(state==='rescued'){
-    ctx.fillStyle='rgba(57,255,20,0.18)';ctx.fillRect(x+2,y+2,TILE-4,TILE-4);
-    ctx.strokeStyle='rgba(57,255,20,0.5)';ctx.lineWidth=2;ctx.strokeRect(x+2,y+2,TILE-4,TILE-4);
-  } else {
-    ctx.fillStyle='rgba(56,189,248,0.15)';ctx.fillRect(x+2,y+2,TILE-4,TILE-4);
-  }
-  // 몸통 색
-  var bodyColor=state==='infected'?'#854d0e':state==='rescued'?'#065f46':'#2563eb';
-  ctx.fillStyle=bodyColor;ctx.fillRect(cx-5*s,cy-1*s,10*s,9*s);
-  // 머리
-  ctx.fillStyle=state==='infected'?'#92400e':'#fde68a';
-  ctx.beginPath();ctx.arc(cx,cy-5.5*s,5.5*s,0,Math.PI*2);ctx.fill();
-  // 눈
-  ctx.fillStyle=state==='infected'?'#ff3333':'#1e293b';
-  ctx.fillRect(cx-3*s,cy-7*s,2*s,2*s);ctx.fillRect(cx+1*s,cy-7*s,2*s,2*s);
-  // 감염 진행 바 (머리 위)
-  if(state==='infected'){
-    var pct=0;
-    for(var i=0;i<G.citizens.length;i++){
-      if(G.citizens[i].r===r&&G.citizens[i].c===c){pct=G.citizens[i].infTimer/80;break;}
+    // 깜빡이는 테두리
+    if(G.followers.length>=MAX_FOLLOWERS){
+      ctx.strokeStyle=Math.floor(Date.now()/250)%2===0?'#fff':'#fbbf24';
+      ctx.lineWidth=3;ctx.strokeRect(x+1,y+1,TILE-2,TILE-2);
+    } else {
+      ctx.strokeStyle='#fbbf24';ctx.lineWidth=2;
+      ctx.strokeRect(x+1,y+1,TILE-2,TILE-2);
     }
-    ctx.fillStyle='rgba(0,0,0,0.5)';ctx.fillRect(x+2,y+1,TILE-4,5);
-    ctx.fillStyle='#ff2222';ctx.fillRect(x+2,y+1,Math.floor((TILE-4)*pct),5);
-    // 해독 가능 표시
-    ctx.fillStyle='#fbbf24';ctx.font='7px sans-serif';ctx.textAlign='center';
-    ctx.fillText('💉',cx,y+2);
-  }
-  // 면역 배지
-  if(state==='rescued'){
-    ctx.fillStyle='#39ff14';ctx.shadowColor='#39ff14';ctx.shadowBlur=3*s;
-    ctx.beginPath();ctx.arc(cx+5*s,cy-9*s,3*s,0,Math.PI*2);ctx.fill();
-    ctx.shadowBlur=0;ctx.fillStyle='#000';
-    ctx.font='bold '+Math.floor(4*s)+'px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
-    ctx.fillText('v',cx+5*s,cy-9*s);
-  }
-  ctx.fillStyle=bodyColor;ctx.fillRect(cx-9*s,cy,4*s,3*s);ctx.fillRect(cx+5*s,cy,4*s,3*s);
-  ctx.fillStyle='#475569';ctx.fillRect(cx-4*s,cy+8*s,3*s,5*s);ctx.fillRect(cx+1*s,cy+8*s,3*s,5*s);
-}
-
-function drawBombEntity(r,c,timer){
-  var x=c*TILE,y=r*TILE,cx=x+TILE/2,cy=y+TILE/2,s=TILE/32;
-  var blink=timer<12&&Math.floor(Date.now()/120)%2===0;
-  ctx.fillStyle=blink?'#ff4444':'#1a1a1a';
-  ctx.shadowColor=blink?'#ff4444':'transparent';ctx.shadowBlur=blink?8*s:0;
-  ctx.beginPath();ctx.arc(cx,cy+s,8*s,0,Math.PI*2);ctx.fill();
-  ctx.shadowBlur=0;
-  ctx.strokeStyle=blink?'#ff6600':'#888';ctx.lineWidth=2*s;
-  ctx.beginPath();ctx.moveTo(cx+4*s,cy-6*s);ctx.quadraticCurveTo(cx+9*s,cy-11*s,cx+6*s,cy-14*s);ctx.stroke();
-  if(Math.floor(Date.now()/200)%2===0){
-    ctx.fillStyle='#ff8800';ctx.shadowColor='#ff8800';ctx.shadowBlur=4*s;
-    ctx.beginPath();ctx.arc(cx+6*s,cy-14*s,2*s,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;
+    // 방향 화살표 — 화면에 항상 표시 (대피소가 보일 때)
+  } else {
+    // 잔디 — 밝고 선명하게
+    var dark=(r+c)%2===0;
+    ctx.fillStyle=dark?'#3a7a28':'#4a9a35';
+    ctx.fillRect(x,y,TILE,TILE);
+    // 잔디 질감
+    ctx.fillStyle=dark?'rgba(0,0,0,0.08)':'rgba(255,255,255,0.05)';
+    ctx.fillRect(x,y+TILE-3,TILE,3);
+    ctx.fillRect(x+TILE-3,y,3,TILE);
   }
 }
 
@@ -728,110 +1160,199 @@ function drawBombEntity(r,c,timer){
 // RENDER
 // ══════════════════════════════════════
 var floats=[];
+
 function render(){
   ctx.clearRect(0,0,canvas.width,canvas.height);
+  // map
   for(var r=0;r<ROWS;r++)for(var c=0;c<COLS;c++)drawTile(r,c);
 
-  // 바리케이드
+  // barriers
   G.barriers.forEach(function(b){
-    var bx=b.c*TILE,by=b.r*TILE;
-    ctx.fillStyle='#f97316';ctx.fillRect(bx+2,by+TILE/2-3,TILE-4,6);
-    ctx.fillStyle='#fff';ctx.fillRect(bx+2,by+TILE/2-1,TILE-4,2);
+    var bx=b.c*TILE, by=b.r*TILE;
+    ctx.fillStyle='#f97316';
+    ctx.fillRect(bx+2,by+TILE/2-3,TILE-4,6);
+    ctx.fillStyle='#fff';
+    ctx.fillRect(bx+2,by+TILE/2-1,TILE-4,2);
     ctx.fillStyle='#dc2626';
-    for(var bi=0;bi<3;bi++)ctx.fillRect(bx+4+bi*8,by+TILE/2-6,4,12);
-    ctx.strokeStyle='rgba(255,150,0,0.5)';ctx.lineWidth=2;ctx.strokeRect(bx+2,by+2,TILE-4,TILE-4);
+    for(var bi=0;bi<3;bi++){
+      ctx.fillRect(bx+4+bi*8,by+TILE/2-6,4,12);
+    }
+    ctx.strokeStyle='rgba(255,150,0,0.6)';
+    ctx.lineWidth=2;ctx.strokeRect(bx+2,by+2,TILE-4,TILE-4);
   });
 
-  // 폭탄 아이템
-  var t2=Date.now();
-  G.bombItems.forEach(function(item){
-    if(item.collected)return;
-    var bx=item.c*TILE,by=item.r*TILE;
-    var gw=Math.sin(t2*0.005)*0.3+0.7;
-    ctx.fillStyle='rgba(251,191,36,'+gw.toFixed(2)+')';
-    ctx.beginPath();ctx.arc(bx+TILE/2,by+TILE/2,TILE*0.36,0,Math.PI*2);ctx.fill();
-    ctx.font=Math.floor(TILE*0.48)+'px serif';ctx.textAlign='center';ctx.textBaseline='middle';
-    ctx.fillText('💣',bx+TILE/2,by+TILE/2);
-  });
-
-  // 폭발
-  G.explosions.forEach(function(exp){
-    exp.cells.forEach(function(cell){
-      var ex=cell.c*TILE,ey=cell.r*TILE,alpha=1-exp.frame/10;
-      ctx.fillStyle='rgba(255,100,0,'+alpha+')';ctx.fillRect(ex,ey,TILE,TILE);
-      ctx.fillStyle='rgba(255,255,0,'+(alpha*0.8)+')';ctx.fillRect(ex+TILE/4,ey+TILE/4,TILE/2,TILE/2);
+  // bombs
+  if(G.bombs){
+    G.bombs.forEach(function(b){
+      if(!b.exploded) drawBombEntity(b.r,b.c,b.timer);
     });
-  });
+  }
 
-  // 설치된 폭탄
-  G.bombs.forEach(function(b){if(!b.exploded)drawBombEntity(b.r,b.c,b.timer);});
-
-  // 시민 (normal, infected)
-  G.citizens.forEach(function(cit){
-    if(cit.state==='evacuated')return;
-    drawCitizen(cit.r,cit.c,cit.state);
-  });
-
-  // 팔로워 (rescued)
-  G.followers.forEach(function(f,i){
-    drawCitizen(f.r,f.c,'rescued');
-    ctx.fillStyle='#fbbf24';ctx.font='bold 8px "Press Start 2P",monospace';
-    ctx.textAlign='center';ctx.strokeStyle='#000';ctx.lineWidth=2;
-    ctx.strokeText(i+1,(f.c+.5)*TILE,(f.r+1)*TILE-2);
-    ctx.fillText(i+1,(f.c+.5)*TILE,(f.r+1)*TILE-2);
-  });
-
-  // 좀비
-  G.zombies.forEach(function(z){drawZombie(z.r,z.c,z.super||false);});
-
-  // 대피소 방향 화살표
-  if(G.followers.length>0&&G.player){
-    var p=G.player,dr=G.shelterR-p.r,dc=G.shelterC-p.c;
-    if(Math.abs(dr)+Math.abs(dc)>1){
-      var angle=Math.atan2(dr,dc);
-      ctx.save();ctx.translate((p.c+.5)*TILE,(p.r-.7)*TILE);ctx.rotate(angle);
-      ctx.fillStyle='#fbbf24';ctx.font='bold 14px sans-serif';
+  // 💣 폭탄 아이템 (줍기 가능) — 반짝이는 표시
+  if(G.bombItems){
+    var t=Date.now();
+    G.bombItems.forEach(function(item){
+      if(item.collected)return;
+      var bx=item.c*TILE, by=item.r*TILE;
+      // 황금 배경
+      var glow=Math.sin(t*0.005)*0.3+0.7;
+      ctx.fillStyle='rgba(251,191,36,'+glow.toFixed(2)+')';
+      ctx.beginPath();
+      ctx.arc(bx+TILE/2, by+TILE/2, TILE*0.38, 0, Math.PI*2);
+      ctx.fill();
+      // 폭탄 이모지
+      ctx.font=Math.floor(TILE*0.5)+'px serif';
       ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillText('💣', bx+TILE/2, by+TILE/2);
+      // GET 표시
+      ctx.fillStyle='#fff';
+      ctx.font='bold 6px "Press Start 2P",monospace';
+      ctx.fillText('GET', bx+TILE/2, by+TILE-4);
+    });
+  }
+
+  // explosions
+  if(G.explosions){
+    G.explosions.forEach(function(exp){
+      exp.cells.forEach(function(cell){
+        var ex=cell.c*TILE, ey=cell.r*TILE;
+        var alpha=1-exp.frame/10;
+        ctx.fillStyle='rgba(255,100,0,'+alpha+')';
+        ctx.fillRect(ex,ey,TILE,TILE);
+        ctx.fillStyle='rgba(255,255,0,'+(alpha*0.8)+')';
+        ctx.fillRect(ex+TILE/4,ey+TILE/4,TILE/2,TILE/2);
+        ctx.fillStyle='rgba(255,255,255,'+(alpha*0.5)+')';
+        ctx.fillRect(ex+TILE/3,ey+TILE/3,TILE/3,TILE/3);
+      });
+    });
+  }
+
+  // citizens
+  G.citizens.forEach(function(cit){
+    if(cit.rescued)return;
+    if(cit.infected){
+      // 감염 시민 배경 (빨간 경고)
+      ctx.fillStyle='rgba(220,38,38,0.25)';
+      ctx.fillRect(cit.c*TILE+2,cit.r*TILE+2,TILE-4,TILE-4);
+      drawCitizen(cit.r,cit.c,true,false);
+      // 감염 진행 바 — 머리 위에
+      var pct=cit.infTimer/60;
+      ctx.fillStyle='rgba(0,0,0,0.5)';
+      ctx.fillRect(cit.c*TILE+2,cit.r*TILE+1,TILE-4,5);
+      ctx.fillStyle='#ff2222';
+      ctx.fillRect(cit.c*TILE+2,cit.r*TILE+1,Math.floor((TILE-4)*pct),5);
+    } else {
+      // 일반 시민 배경 (파란 안내)
+      ctx.fillStyle='rgba(56,189,248,0.15)';
+      ctx.fillRect(cit.c*TILE+2,cit.r*TILE+2,TILE-4,TILE-4);
+      drawCitizen(cit.r,cit.c,false,cit.immune);
+    }
+  });
+
+  // followers — 초록 배경으로 구별
+  G.followers.forEach(function(f,i){
+    ctx.fillStyle='rgba(57,255,20,0.2)';
+    ctx.fillRect(f.c*TILE+2,f.r*TILE+2,TILE-4,TILE-4);
+    ctx.strokeStyle='rgba(57,255,20,0.5)';
+    ctx.lineWidth=2;
+    ctx.strokeRect(f.c*TILE+2,f.r*TILE+2,TILE-4,TILE-4);
+    drawCitizen(f.r,f.c,false,true);
+    ctx.fillStyle='#fbbf24';
+    ctx.font='bold 8px "Press Start 2P",monospace';
+    ctx.textAlign='center'; ctx.strokeStyle='#000'; ctx.lineWidth=2;
+    ctx.strokeText(i+1,(f.c+.5)*TILE,(f.r+1)*TILE-3);
+    ctx.fillText(i+1,(f.c+.5)*TILE,(f.r+1)*TILE-3);
+  });
+
+  // zombies — 빨간 위험 배경
+  G.zombies.forEach(function(z){
+    ctx.fillStyle=z.super?'rgba(168,85,247,0.3)':'rgba(220,38,38,0.22)';
+    ctx.fillRect(z.c*TILE+1,z.r*TILE+1,TILE-2,TILE-2);
+    drawZombie(z.r,z.c,z.super||false);
+  });
+
+  // 대피소 방향 화살표 (3명 모이면 플레이어 위에 표시)
+  if(G.followers.length>=MAX_FOLLOWERS&&G.player){
+    var p=G.player;
+    var dr=G.shelterR-p.r, dc=G.shelterC-p.c;
+    var dist=Math.abs(dr)+Math.abs(dc);
+    ctx.fillStyle='rgba(251,191,36,0.15)';
+    ctx.fillRect((G.shelterC-1)*TILE,(G.shelterR-1)*TILE,TILE*3,TILE*3);
+    if(dist>1){
+      var angle=Math.atan2(dr,dc);
+      var ax=(p.c+.5)*TILE, ay=(p.r-.7)*TILE;
+      ctx.save();
+      ctx.translate(ax,ay);ctx.rotate(angle);
+      ctx.fillStyle='#fbbf24';
+      ctx.font='bold 16px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
       ctx.shadowColor='#fbbf24';ctx.shadowBlur=8;
       ctx.strokeStyle='#000';ctx.lineWidth=3;
       ctx.strokeText('→',0,0);ctx.fillText('→',0,0);
-      ctx.shadowBlur=0;ctx.restore();
+      ctx.shadowBlur=0;
+      ctx.restore();
     }
   }
 
-  // 플레이어
+  // player
   if(G.player){
     var p=G.player;
-    if(G.hitFlash>0&&Math.floor(G.hitFlash/4)%2===0){
-      ctx.fillStyle='rgba(255,0,0,0.4)';ctx.fillRect(p.c*TILE,p.r*TILE,TILE,TILE);
-    } else {
+    var flash=G.hitFlash>0&&Math.floor(G.hitFlash/4)%2===0;
+    if(!flash){
+      // 히어로 배경 후광 (항상 표시)
+      var heroGlow=Math.sin(Date.now()*0.005)*0.3+0.7;
+      ctx.fillStyle='rgba(96,165,250,'+heroGlow.toFixed(2)+')';
+      ctx.beginPath();
+      ctx.arc((p.c+.5)*TILE,(p.r+.5)*TILE,TILE*0.55,0,Math.PI*2);
+      ctx.fill();
       drawHero(p.r,p.c);
+      // 팔로워 수 표시
       if(G.followers.length>0){
-        ctx.fillStyle='#fbbf24';ctx.font='bold 8px "Press Start 2P",monospace';
-        ctx.textAlign='center';ctx.strokeStyle='#000';ctx.lineWidth=2;
-        ctx.strokeText('x'+G.followers.length,(p.c+1)*TILE-2,p.r*TILE+6);
-        ctx.fillText('x'+G.followers.length,(p.c+1)*TILE-2,p.r*TILE+6);
+        ctx.fillStyle='#fbbf24';
+        ctx.font='bold 9px "Press Start 2P",monospace';ctx.textAlign='center';
+        ctx.strokeStyle='#000';ctx.lineWidth=2;
+        ctx.strokeText('×'+G.followers.length,(p.c+1)*TILE-2,p.r*TILE+6);
+        ctx.fillText('×'+G.followers.length,(p.c+1)*TILE-2,p.r*TILE+6);
       }
+    } else {
+      // 피격 시 빨간 번쩍임
+      ctx.fillStyle='rgba(255,0,0,0.4)';
+      ctx.fillRect(p.c*TILE,p.r*TILE,TILE,TILE);
     }
   }
 
-  // 플로트 텍스트
+  // float texts
   floats.forEach(function(f){
     ctx.save();ctx.globalAlpha=f.life/50;
-    ctx.fillStyle=f.color||'#ffff00';ctx.strokeStyle='#000';ctx.lineWidth=2;
+    ctx.fillStyle=f.color||'#ffff00';
+    ctx.strokeStyle='#000';ctx.lineWidth=2;
     ctx.font='bold 9px "Press Start 2P",monospace';ctx.textAlign='center';
     ctx.strokeText(f.text,f.x,f.y);ctx.fillText(f.text,f.x,f.y);
     ctx.restore();
   });
-
-  // 감염 시민 해독 힌트
-  var infNear=G.player&&G.citizens.some(function(ci){
-    return ci.state==='infected'&&Math.abs(ci.r-G.player.r)+Math.abs(ci.c-G.player.c)<=2;
-  });
-  document.getElementById('cureHint').style.display=infNear?'block':'none';
 }
-function addFloat(r,c,text,color){
+
+function float(r,c,text,color){
   floats.push({x:(c+.5)*TILE,y:r*TILE,text:text,life:50,color:color||'#ffff00'});
+}
+
+// ══════════════════════════════════════
+// SPEECH BUBBLE
+// ══════════════════════════════════════
+var bubTimer=null;
+function bubble(text,r,c){
+  var old=document.querySelector('.bubble');
+  if(old)old.remove();
+  if(bubTimer)clearTimeout(bubTimer);
+  var el=document.createElement('div');
+  el.className='bubble';el.textContent=text;
+  // canvas 위치 계산
+  var rect=canvas.getBoundingClientRect();
+  var bx=rect.left+c*TILE*(rect.width/canvas.width);
+  var by=rect.top+r*TILE*(rect.height/canvas.height)-50;
+  el.style.left=Math.min(bx,window.innerWidth-190)+'px';
+  el.style.top=Math.max(by,60)+'px';
+  document.body.appendChild(el);
+  bubTimer=setTimeout(function(){if(el.parentNode)el.remove();},1800);
 }
 
 // ══════════════════════════════════════
@@ -840,42 +1361,29 @@ function addFloat(r,c,text,color){
 var KEYS={};
 window.addEventListener('keydown',function(e){
   KEYS[e.key]=true;
-  if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key))e.preventDefault();
-  if(e.key==='b'||e.key==='B')placeBomb();
-  if(e.key==='z'||e.key==='Z'||e.key===' ')tryRescue();
+  if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' '].includes(e.key))e.preventDefault();
+  if(e.key==='b'||e.key==='B'){placeBomb();}
+  if(e.key===' '||e.key==='z'||e.key==='Z'){tryRescue();}
 });
 window.addEventListener('keyup',function(e){KEYS[e.key]=false;});
 
-// D-pad (터치 중복 방지)
+function dpPress(dir){KEYS['Arrow'+dir]=true;document.getElementById('d'+dir[0]).classList.add('on')}
+function dpRelease(dir){KEYS['Arrow'+dir]=false;document.getElementById('d'+dir[0]).classList.remove('on')}
+
 ['Up','Down','Left','Right'].forEach(function(d){
   var btn=document.getElementById('d'+d[0]);
-  if(!btn)return;
-  btn.addEventListener('touchstart',function(e){e.preventDefault();KEYS['Arrow'+d]=true;btn.classList.add('on');},{passive:false});
-  btn.addEventListener('touchend',function(e){e.preventDefault();KEYS['Arrow'+d]=false;btn.classList.remove('on');},{passive:false});
-  btn.addEventListener('mousedown',function(){KEYS['Arrow'+d]=true;});
-  btn.addEventListener('mouseup',function(){KEYS['Arrow'+d]=false;});
-  btn.addEventListener('mouseleave',function(){KEYS['Arrow'+d]=false;});
+  btn.addEventListener('touchstart',function(e){dpPress(d);e.preventDefault()},{passive:false});
+  btn.addEventListener('touchend',function(e){dpRelease(d);e.preventDefault()},{passive:false});
+  btn.addEventListener('mousedown',function(){dpPress(d)});
+  btn.addEventListener('mouseup',function(){dpRelease(d)});
+  btn.addEventListener('mouseleave',function(){dpRelease(d)});
 });
 
-// 액션 버튼 (touch/click 중복 방지)
-function addActionBtn(id,fn){
-  var btn=document.getElementById(id);if(!btn)return;
-  var lastTouch=0;
-  btn.addEventListener('touchstart',function(e){
-    e.preventDefault();lastTouch=Date.now();fn();
-  },{passive:false});
-  btn.addEventListener('click',function(){
-    if(Date.now()-lastTouch>300)fn();
-  });
-}
-addActionBtn('abBarrier',placeBarrier);
-addActionBtn('abBomb',placeBomb);
-addActionBtn('abRescue',tryRescue);
-
 // ══════════════════════════════════════
-// MOVE
+// PLAYER MOVE
 // ══════════════════════════════════════
 var moveDelay=0;
+
 function tryMove(){
   if(moveDelay>0){moveDelay--;return;}
   var p=G.player,dr=0,dc=0;
@@ -885,114 +1393,73 @@ function tryMove(){
   else if(KEYS['ArrowRight'])dc=1;
   if(!dr&&!dc)return;
   var nr=p.r+dr,nc=p.c+dc;
-  if(!walkable(nr,nc,true))return; // 플레이어는 barrier 통과
+  if(!walkable(nr,nc))return;
   moveDelay=3;
-  var pr=p.r,pc=p.c;p.r=nr;p.c=nc;
+  var pr=p.r,pc=p.c;
+  p.r=nr;p.c=nc;
   // 팔로워 체인
   for(var i=0;i<G.followers.length;i++){
-    var f=G.followers[i],fr=f.r,fc=f.c;f.r=pr;f.c=pc;pr=fr;pc=fc;
+    var f=G.followers[i],fr=f.r,fc=f.c;
+    f.r=pr;f.c=pc;pr=fr;pc=fc;
   }
-  // 대피소 입장
-  if(G.map[nr][nc]===SHELTER&&G.followers.length>0){
+  // 대피소 입장 — SHELTER 셀에 올라가면 + 3명 이상
+  if(G.map[nr][nc]===SHELTER&&G.followers.length>=MAX_FOLLOWERS){
     enterShelter();return;
   }
   // 자동 구출
-  autoRescue();
-  // 폭탄 아이템 줍기
-  G.bombItems.forEach(function(item){
-    if(!item.collected&&item.r===nr&&item.c===nc){
-      item.collected=true;G.bombLeft++;
-      addFloat(nr,nc,'💣 +1','#ff8800');G.score+=5;
-    }
-  });
+  stepRescue();
 }
 
-function autoRescue(){
+function stepRescue(){
   var p=G.player;
   G.citizens.forEach(function(cit){
-    if(cit.state==='normal'&&cit.r===p.r&&cit.c===p.c){
+    if(!cit.rescued&&!cit.infected&&cit.r===p.r&&cit.c===p.c){
       recruitCitizen(cit);
     }
   });
 }
 
-// ══════════════════════════════════════
-// RESCUE & CURE
-// ══════════════════════════════════════
 function tryRescue(){
   if(!G.running||!G.player)return;
-  var p=G.player;
-  var dirs=[[0,0],[-1,0],[1,0],[0,-1],[0,1]];
-  var acted=false;
-  dirs.forEach(function(d){
-    if(acted)return;
-    var tr=p.r+d[0],tc=p.c+d[1];
-    G.citizens.forEach(function(cit){
-      if(acted)return;
-      if(cit.r!==tr||cit.c!==tc)return;
-      if(cit.state==='normal'){
-        recruitCitizen(cit);acted=true;
-      } else if(cit.state==='infected'){
-        // 해독!
-        cit.state='normal';cit.infTimer=0;
-        addFloat(cit.r,cit.c,T('logCure'),'#39ff14');
-        sitMsg('cure');acted=true;
+  var p=G.player,dirs=[[0,0],[-1,0],[1,0],[0,-1],[0,1]];
+  for(var di=0;di<dirs.length;di++){
+    var tr=p.r+dirs[di][0],tc=p.c+dirs[di][1];
+    for(var ci=0;ci<G.citizens.length;ci++){
+      var cit=G.citizens[ci];
+      if(!cit.rescued&&!cit.infected&&cit.r===tr&&cit.c===tc){
+        recruitCitizen(cit);return;
       }
-    });
-  });
+    }
+  }
 }
 
 function recruitCitizen(cit){
-  // 최대 팔로워 = 남은 시민 수에 따라 동적 조정
-  var remaining=G.citizens.filter(function(c){return c.state==='normal';}).length;
-  var maxFollow=Math.min(MAX_FOLLOWERS,remaining);
-  if(G.followers.length>=maxFollow){
-    if(G.followers.length>=MAX_FOLLOWERS){
-      addFloat(G.player.r,G.player.c,T('logFull'),'#fbbf24');return;
-    }
+  if(G.followers.length>=MAX_FOLLOWERS){
+    bubble(T('bubFull'),G.player.r,G.player.c);return;
   }
-  cit.state='rescued';cit.immune=true;
+  cit.rescued=true;cit.immune=true;
   G.followers.push({r:cit.r,c:cit.c,id:cit.id});
   G.score+=15;
-  addFloat(cit.r,cit.c,T('logRescue'),'#39ff14');
-  sitMsg('rescue');
-  // 남은 일반 시민 수 체크 — 대피소로 안내
-  var normalLeft=G.citizens.filter(function(c){return c.state==='normal';}).length;
-  if(G.followers.length>=MAX_FOLLOWERS||(normalLeft===0&&G.followers.length>0)){
-    addFloat(G.player.r,G.player.c,T('logFull'),'#fbbf24');
+  playSFX('rescue', 2);
+  bubble(T('bubRescue'),cit.r,cit.c);
+  float(cit.r,cit.c,'+15 💉','#39ff14');
+  if(G.followers.length>=MAX_FOLLOWERS){
+    bubble(T('bubFull'),G.player.r,G.player.c);
+    float(G.player.r,G.player.c,'🏠 →','#fbbf24');
   }
   updateHUD();
 }
-
-// ══════════════════════════════════════
-// SHELTER ENTRY
-// ══════════════════════════════════════
 function enterShelter(){
-  if(G.followers.length===0)return;
   var cnt=G.followers.length;
-  // 팔로워를 evacuated로 마킹
-  G.followers.forEach(function(f){
-    G.citizens.forEach(function(cit){
-      if(cit.id===f.id){cit.state='evacuated';}
-    });
-  });
-  G.rescued+=cnt;
-  G.score+=cnt*40+50;
+  G.rescued+=cnt;G.score+=cnt*40+80;
   G.followers=[];
-  addFloat(G.shelterR,G.shelterC,T('logShelter'),'#fbbf24');
+  playSFX('shelter', 2.5);
+  bubble(T('bubShelter'),G.shelterR,G.shelterC);
+  float(G.shelterR,G.shelterC,'대피 완료! +'+(cnt*40+80),'#fbbf24');
   sitMsg('shelter');
   updateHUD();
-  checkWaveEnd();
-}
-
-function checkWaveEnd(){
-  var normalLeft=G.citizens.filter(function(c){return c.state==='normal';}).length;
-  var rescuedLeft=G.followers.length;
-  var infectedLeft=G.citizens.filter(function(c){return c.state==='infected';}).length;
-  // 더 이상 구출 가능한 시민이 없으면 클리어
-  if(normalLeft===0&&rescuedLeft===0&&infectedLeft===0){
-    setTimeout(waveComplete,600);
-  }
+  var rem=G.citizens.filter(function(c){return!c.rescued&&!c.infected}).length;
+  if(rem===0){sitMsg('all_rescued');setTimeout(waveComplete,800);}
 }
 
 // ══════════════════════════════════════
@@ -1000,41 +1467,44 @@ function checkWaveEnd(){
 // ══════════════════════════════════════
 function placeBarrier(){
   if(!G.running||!G.player)return;
-  if(G.barrierLeft<=0){addFloat(G.player.r,G.player.c,T('logNoAP'),'#ff3333');return;}
+  if(G.barrierLeft<=0){bubble(T('bubNoAP'),G.player.r,G.player.c);return;}
   var p=G.player;
-  // 플레이어 위치가 아닌 이동 방향 앞에 설치 (안 움직이면 현재 위치)
-  var br=p.r,bc=p.c;
-  if(KEYS['ArrowUp'])br=p.r-1;
-  else if(KEYS['ArrowDown'])br=p.r+1;
-  else if(KEYS['ArrowLeft'])bc=p.c-1;
-  else if(KEYS['ArrowRight'])bc=p.c+1;
-  // 유효성 검사
-  if(br<0||br>=ROWS||bc<0||bc>=COLS)return;
-  if(G.map[br][bc]!==EMPTY&&G.map[br][bc]!==SHELTER)return;
-  for(var i=0;i<G.barriers.length;i++)if(G.barriers[i].r===br&&G.barriers[i].c===bc)return;
-  G.barriers.push({r:br,c:bc});
+  // 이미 있으면 skip
+  for(var i=0;i<G.barriers.length;i++)
+    if(G.barriers[i].r===p.r&&G.barriers[i].c===p.c)return;
+  G.barriers.push({r:p.r,c:p.c});
   G.barrierLeft--;
-  addFloat(br,bc,T('logBarrier'),'#f97316');
+  bubble(T('bubBarrier'),p.r,p.c);
+  float(p.r,p.c,'🚧','#f97316');
   sitMsg('barrier');
-  document.getElementById('abBarrier').textContent='🚧x'+G.barrierLeft;
+  document.getElementById('abBarrier').textContent='🚧×'+G.barrierLeft;
 }
 
 // ══════════════════════════════════════
-// BOMB
+// BOMB SYSTEM
 // ══════════════════════════════════════
 function placeBomb(){
   if(!G.running||!G.player)return;
-  if(G.bombLeft<=0){addFloat(G.player.r,G.player.c,T('logNoBomb'),'#ff3333');return;}
+  if(!G.bombLeft||G.bombLeft<=0){
+    float(G.player.r,G.player.c,'💣 없음!','#ff3333');return;
+  }
   var p=G.player;
-  for(var i=0;i<G.bombs.length;i++)
+  // 같은 위치 중복 방지
+  for(var i=0;i<G.bombs.length;i++){
     if(!G.bombs[i].exploded&&G.bombs[i].r===p.r&&G.bombs[i].c===p.c)return;
-  G.bombLeft--;G.bombs.push({r:p.r,c:p.c,timer:35,exploded:false});
-  addFloat(p.r,p.c,'💣','#ff8800');
-  document.getElementById('abBomb').textContent='💣x'+G.bombLeft;
+  }
+  G.bombLeft--;
+  G.bombs.push({r:p.r,c:p.c,timer:35,exploded:false});
+  float(p.r,p.c,'💣 설치!','#ff8800');
+  document.getElementById('abBomb').textContent='💣×'+G.bombLeft;
 }
 
 function updateBombs(){
-  G.bombs.forEach(function(b){if(!b.exploded){b.timer--;if(b.timer<=0)explodeBomb(b);}});
+  G.bombs.forEach(function(b){
+    if(b.exploded)return;
+    b.timer--;
+    if(b.timer<=0)explodeBomb(b);
+  });
   G.bombs=G.bombs.filter(function(b){return!b.exploded;});
   G.explosions.forEach(function(e){e.frame++;});
   G.explosions=G.explosions.filter(function(e){return e.frame<10;});
@@ -1042,97 +1512,137 @@ function updateBombs(){
 
 function explodeBomb(b){
   b.exploded=true;
+  playSFX('bomb', 2);
   var cells=[];
-  var dirs2=[[0,0],[-1,0],[1,0],[0,-1],[0,1],[-1,-1],[-1,1],[1,-1],[1,1],[-2,0],[2,0],[0,-2],[0,2]];
-  dirs2.forEach(function(d){
+  // 십자 + 대각선 3x3
+  var dirs=[
+    [0,0],[-1,0],[1,0],[0,-1],[0,1],
+    [-1,-1],[-1,1],[1,-1],[1,1],
+    [-2,0],[2,0],[0,-2],[0,2]
+  ];
+  dirs.forEach(function(d){
     var er=b.r+d[0],ec=b.c+d[1];
     if(er<0||er>=ROWS||ec<0||ec>=COLS)return;
     if(G.map[er][ec]===WALL)return;
-    if(G.map[er][ec]===SOFT){G.map[er][ec]=EMPTY;G.score+=5;}
+    // 벽돌 파괴!
+    if(G.map[er][ec]===SOFT){
+      G.map[er][ec]=EMPTY;
+      G.score+=5;
+    }
     cells.push({r:er,c:ec});
   });
   G.explosions.push({cells:cells,frame:0});
+
+  // 좀비 제거
   var killed=0;
   G.zombies=G.zombies.filter(function(z){
     var hit=cells.some(function(cell){return cell.r===z.r&&cell.c===z.c;});
-    if(hit){G.score+=50;killed++;}return!hit;
+    if(hit){G.score+=50;killed++;}
+    return!hit;
   });
-  if(killed>0)addFloat(b.r,b.c,T('logBomb')+' +'+killed*50,'#ff8800');
+  if(killed>0){
+    float(b.r,b.c,'💥 +'+killed*50,'#ff8800');
+    sitMsg('barrier');
+  }
+
   // 팔로워 날아감
   G.followers=G.followers.filter(function(f){
     var hit=cells.some(function(cell){return cell.r===f.r&&cell.c===f.c;});
-    if(hit){G.citizens.forEach(function(cit){if(cit.id===f.id)cit.state='normal';});}
+    if(hit){
+      G.citizens.forEach(function(cit){if(cit.id===f.id){cit.rescued=false;cit.immune=false;}});
+    }
     return!hit;
+  });
+
+  // 벽돌 파괴 후 타일 재그리기
+  cells.forEach(function(cell){
+    if(G.tileMeshes&&G.tileMeshes[cell.r]){}// 2D라서 render에서 자동 반영
   });
   updateHUD();
 }
-
-// ══════════════════════════════════════
-// ZOMBIE AI
-// ══════════════════════════════════════
 function updateZombies(){
   var wconf=WAVES[G.wave-1];
   G.zombies.forEach(function(z){
-    z.tick++;if(z.tick<z.spd)return;z.tick=0;
-    var target=findTarget(z);
-    if(target)moveToward(z,target);
-    checkZombieCollision(z,wconf);
+    z.tick++;
+    if(z.tick<z.spd)return;
+    z.tick=0;
+    // 가장 가까운 시민 또는 팔로워를 우선 타겟
+    var target=findNearestVictim(z);
+    if(!target)target=G.player;
+    moveToward(z,target);
+    // 충돌 체크
+    checkZombieHit(z);
   });
-  // 시민 감염 진행
+
+  // 시민 감염
   G.citizens.forEach(function(cit){
-    if(cit.state!=='infected')return;
-    cit.infTimer++;
-    if(cit.infTimer>=80){
-      // 완전 좀비화
-      G.citizens=G.citizens.filter(function(c){return c.id!==cit.id;});
-      G.totalCit=Math.max(0,G.totalCit-1);
-      G.zombies.push({r:cit.r,c:cit.c,id:newUID(),spd:wconf.zSpd,tick:0,super:false});
-      addFloat(cit.r,cit.c,'...','#ff3333');
-      updateHUD();
-      checkWaveEnd();
+    if(cit.rescued||cit.infected||cit.immune)return;
+    G.zombies.forEach(function(z){
+      if(z.r===cit.r&&z.c===cit.c&&Math.random()<wconf.infRate*0.1){
+        cit.infected=true;
+        float(cit.r,cit.c,T('bubInfect'),'#ff3333');
+        sitMsg('infect');
+      }
+    });
+    if(cit.infected){
+      cit.infTimer++;
+      if(cit.infTimer>=60){
+        // 완전 좀비화
+        G.citizens=G.citizens.filter(function(c){return c.id!==cit.id});
+        G.zombies.push({r:cit.r,c:cit.c,id:uid(),spd:z?z.spd:6,tick:0,super:false});
+        G.totalCit=Math.max(0,G.totalCit-1);
+        float(cit.r,cit.c,'💀→🧟','#ff3333');
+        updateHUD();
+      }
     }
   });
 }
 
-function findTarget(z){
+function findNearestVictim(z){
   var best=null,bestD=9999;
   // 팔로워 우선
   G.followers.forEach(function(f){
-    var d=Math.abs(f.r-z.r)+Math.abs(f.c-z.c);if(d<bestD){bestD=d;best=f;}
+    var d=Math.abs(f.r-z.r)+Math.abs(f.c-z.c);
+    if(d<bestD){bestD=d;best=f;}
   });
   // 일반 시민
   G.citizens.forEach(function(cit){
-    if(cit.state==='evacuated'||cit.state==='rescued')return;
-    var d=Math.abs(cit.r-z.r)+Math.abs(cit.c-z.c);if(d<bestD){bestD=d;best=cit;}
+    if(cit.rescued||cit.immune)return;
+    var d=Math.abs(cit.r-z.r)+Math.abs(cit.c-z.c);
+    if(d<bestD){bestD=d;best=cit;}
   });
-  if(!best){
-    var d=Math.abs(G.player.r-z.r)+Math.abs(G.player.c-z.c);
-    if(d<bestD)best=G.player;
-  }
   return best;
 }
 
 function moveToward(z,target){
   var dr=target.r-z.r,dc=target.c-z.c;
   var dirs=[];
-  if(Math.abs(dr)>=Math.abs(dc)){dirs.push([dr>0?1:-1,0],[0,dc>0?1:-1],[0,dc>0?-1:1],[dr>0?-1:1,0]);}
-  else{dirs.push([0,dc>0?1:-1],[dr>0?1:-1,0],[dr>0?-1:1,0],[0,dc>0?-1:1]);}
-  if(Math.random()<0.15)shuffle(dirs);
+  if(Math.abs(dr)>=Math.abs(dc)){
+    dirs.push([dr>0?1:-1,0],[0,dc>0?1:-1],[0,-(dc>0?1:-1)],[-(dr>0?1:-1),0]);
+  } else {
+    dirs.push([0,dc>0?1:-1],[dr>0?1:-1,0],[-(dr>0?1:-1),0],[0,-(dc>0?1:-1)]);
+  }
+  // 가끔 랜덤 (우회)
+  if(Math.random()<0.15){shuffle(dirs)}
   for(var i=0;i<dirs.length;i++){
     var nr=z.r+dirs[i][0],nc=z.c+dirs[i][1];
-    if(walkable(nr,nc,false)){z.r=nr;z.c=nc;return;}
+    if(walkable(nr,nc,true)&&G.map[nr][nc]!==SOFT){z.r=nr;z.c=nc;return;}
   }
 }
 
-function checkZombieCollision(z,wconf){
+function checkZombieHit(z){
   var p=G.player;
   // 플레이어 히트
-  if(z.r===p.r&&z.c===p.c&&G.hitFlash===0){
+  if(z.r===p.r&&z.c===p.c){
+    if(G.hitFlash>0)return;
     G.lives--;G.hitFlash=60;
-    // 팔로워 흩어짐
-    G.followers.forEach(function(f){G.citizens.forEach(function(cit){if(cit.id===f.id)cit.state='normal';});});
-    G.followers=[];
-    addFloat(p.r,p.c,T('logZombie'),'#ff3333');
+    playSFX('hit', 1.5);
+    G.followers.forEach(function(f){
+      G.citizens.forEach(function(cit){if(cit.id===f.id){cit.rescued=false;cit.immune=false;}});
+    });
+    G.followers=[];G.shelterActive=false;
+    bubble(T('bubZombie'),p.r,p.c);
+    float(p.r,p.c,'💀 -1 LIFE','#ff3333');
     sitMsg('zombie_hit');
     if(G.lives===1)setTimeout(function(){sitMsg('low_lives');},500);
     updateHUD();
@@ -1141,19 +1651,12 @@ function checkZombieCollision(z,wconf){
   // 팔로워 히트
   G.followers=G.followers.filter(function(f){
     if(f.r===z.r&&f.c===z.c){
-      G.citizens.forEach(function(cit){if(cit.id===f.id)cit.state='normal';});
-      addFloat(f.r,f.c,'!','#ff3333');return false;
+      G.citizens.forEach(function(cit){if(cit.id===f.id){cit.rescued=false;cit.immune=false;}});
+      G.shelterActive=false;
+      float(f.r,f.c,'😱','#ff3333');
+      return false;
     }
     return true;
-  });
-  // 시민 감염 (infected가 아닌 normal만)
-  G.citizens.forEach(function(cit){
-    if(cit.state!=='normal'||cit.immune)return;
-    if(z.r===cit.r&&z.c===cit.c&&Math.random()<wconf.infRate*0.08){
-      cit.state='infected';cit.infTimer=0;
-      addFloat(cit.r,cit.c,T('logInfect'),'#ff3333');
-      sitMsg('infect');
-    }
   });
 }
 
@@ -1164,18 +1667,64 @@ function updateTimer(){
   G.timerTick++;
   if(G.timerTick>=12){G.timerTick=0;G.timer--;}
   if(G.timer<=0){
+    // 추가 좀비 출현
     G.timer=WAVES[G.wave-1].timer;
     var edges=[];
     for(var r=1;r<ROWS-1;r++)for(var c=1;c<COLS-1;c++)
       if(G.map[r][c]===EMPTY&&(r>=ROWS-3||c>=COLS-3))edges.push({r:r,c:c});
     if(edges.length){
       shuffle(edges);
-      G.zombies.push({r:edges[0].r,c:edges[0].c,id:newUID(),spd:WAVES[G.wave-1].zSpd,tick:0,super:false});
-      addFloat(edges[0].r,edges[0].c,'!','#ff3333');
+      G.zombies.push({r:edges[0].r,c:edges[0].c,id:uid(),
+        spd:WAVES[G.wave-1].zSpd,tick:0,super:false});
+      float(edges[0].r,edges[0].c,'⚠️ 추가!','#ff3333');
       sitMsg('timer_warn');
     }
   }
   document.getElementById('hTimer').textContent=G.timer;
+}
+
+// ══════════════════════════════════════
+// GAME LOOP
+// ══════════════════════════════════════
+var loopId=null,lastT=0,acc=0;
+var STEP=1000/12;
+
+function loop(ts){
+  if(!G.running){loopId=null;return;}
+  loopId=requestAnimationFrame(loop);
+  var dt=ts-lastT;lastT=ts;
+  acc+=dt;
+  while(acc>=STEP){acc-=STEP;tick();}
+  // float update
+  floats.forEach(function(f){f.y-=0.8;f.life--;});
+  floats=floats.filter(function(f){return f.life>0;});
+  render();
+  if(G.hitFlash>0)G.hitFlash--;
+  document.getElementById('abBarrier').textContent='🚧×'+G.barrierLeft;
+  document.getElementById('abBomb').textContent='💣×'+(G.bombLeft||0);
+}
+
+function tick(){
+  if(!G.running||!G.player)return;
+  tryMove();
+  updateZombies();
+  updateBombs();
+  updateTimer();
+  // 폭탄 아이템 줍기
+  if(G.bombItems){
+    G.bombItems.forEach(function(item){
+      if(!item.collected&&item.r===G.player.r&&item.c===G.player.c){
+        item.collected=true;
+        G.bombLeft=(G.bombLeft||0)+1;
+        float(item.r,item.c,'💣 GET! +1','#ff8800');
+        G.score+=5;
+      }
+    });
+  }
+  // 시민 감염 진행
+  G.citizens.forEach(function(cit){
+    if(cit.infected&&!cit.rescued){cit.infTimer++;}
+  });
 }
 
 // ══════════════════════════════════════
@@ -1184,93 +1733,43 @@ function updateTimer(){
 function updateHUD(){
   var wconf=WAVES[G.wave-1];
   document.getElementById('hWave').textContent='W'+G.wave+' '+wconf.label;
-  document.getElementById('hLives').textContent='❤'.repeat(Math.max(0,G.lives));
-  var alive=G.citizens.filter(function(c){return c.state!=='evacuated';}).length+G.followers.length;
-  var evacuated=G.rescued;
-  document.getElementById('hRescued').textContent=evacuated+'/'+G.totalCit;
+  document.getElementById('hLives').textContent='❤️'.repeat(Math.max(0,G.lives));
+  var alive=G.citizens.filter(function(c){return!c.rescued&&!c.infected}).length;
+  document.getElementById('hRescued').textContent=G.rescued+'/'+(G.rescued+alive);
   document.getElementById('hScore').textContent=G.score;
-  document.getElementById('abBarrier').textContent='🚧x'+G.barrierLeft;
-  document.getElementById('abBomb').textContent='💣x'+G.bombLeft;
 }
 
 // ══════════════════════════════════════
-// GAME LOOP
-// ══════════════════════════════════════
-var loopId=null,lastT=0,acc=0,STEP=1000/12;
-function loop(ts){
-  if(!G.running){loopId=null;return;}
-  loopId=requestAnimationFrame(loop);
-  var dt=ts-lastT;lastT=ts;acc+=dt;
-  while(acc>=STEP){acc-=STEP;tick();}
-  floats.forEach(function(f){f.y-=0.8;f.life--;});
-  floats=floats.filter(function(f){return f.life>0;});
-  if(G.hitFlash>0)G.hitFlash--;
-  render();
-}
-function tick(){
-  if(!G.running||!G.player)return;
-  tryMove();
-  updateZombies();
-  updateBombs();
-  updateTimer();
-}
-
-// ══════════════════════════════════════
-// SCENARIO
-// ══════════════════════════════════════
-function showScenario(){
-  var wconf=WAVES[G.wave-1],sc=wconf.sc[lang];
-  document.getElementById('scType').textContent=sc.type;
-  document.getElementById('scTitle').textContent=sc.title;
-  document.getElementById('scDesc').textContent=sc.desc;
-  document.getElementById('scMission').textContent=sc.mission;
-  document.getElementById('scTip').textContent=sc.tip;
-  document.getElementById('scStartBtn').textContent=T('scStartBtn');
-  document.getElementById('ovScenario').classList.remove('hidden');
-}
-function closeScenario(){
-  document.getElementById('ovScenario').classList.add('hidden');
-  G.running=true;lastT=performance.now();acc=0;
-  loopId=requestAnimationFrame(loop);
-  setTimeout(function(){sitMsg('rescue');},2000);
-}
-
-// ══════════════════════════════════════
-// PAUSE
-// ══════════════════════════════════════
-function togglePause(){
-  G_PAUSED=!G_PAUSED;
-  var btn=document.getElementById('pauseBtn');
-  if(G_PAUSED){
-    G.running=false;btn.textContent='▶';
-    document.getElementById('ovPause').classList.remove('hidden');
-  } else {
-    document.getElementById('ovPause').classList.add('hidden');
-    btn.textContent='II';G.running=true;
-    lastT=performance.now();acc=0;loopId=requestAnimationFrame(loop);
-  }
-}
-
-// ══════════════════════════════════════
-// GAME FLOW
+// FLOW
 // ══════════════════════════════════════
 function joinGame(){
-  var name=document.getElementById('nameInput').value.trim()||(lang==='ko'?'익명 히어로':'Hero');
+  var name=document.getElementById('nameInput').value.trim()||
+    (lang==='ko'?'익명 히어로':'Hero');
   document.getElementById('nameScreen').classList.add('hidden');
   startGame();
 }
+
 function startGame(){
-  hideAll();G.wave=1;G.lives=3;G.score=0;G.running=false;G.over=false;G.uid=0;
-  spawnWave();resize();updateHUD();showScenario();
+  hideAll();
+  G.wave=1;G.lives=3;G.score=0;G.running=false;G.over=false;G.uid=0;
+  spawnWave();resize();updateHUD();
+  showScenario();
 }
+
 function retryWave(){
-  hideAll();G.running=false;G.over=false;
-  spawnWave();resize();updateHUD();showScenario();
+  hideAll();
+  G.running=false;G.over=false;
+  spawnWave();resize();updateHUD();
+  showScenario();
 }
+
 function nextWave(){
-  hideAll();G.wave++;G.running=false;G.over=false;
-  spawnWave();resize();updateHUD();showScenario();
+  hideAll();
+  G.wave++;G.running=false;G.over=false;
+  spawnWave();resize();updateHUD();
+  showScenario();
 }
+
 function waveComplete(){
   G.running=false;
   if(G.wave>=MAX_WAVES){
@@ -1279,29 +1778,40 @@ function waveComplete(){
   }
   var next=WAVES[G.wave];
   document.getElementById('ocTitle').textContent='WAVE '+G.wave+' CLEAR!';
-  document.getElementById('ocSub').innerHTML=T('savedLabel')+': '+G.rescued+'/'+G.totalCit;
+  document.getElementById('ocSub').innerHTML=
+    T('savedLabel')+': '+G.rescued+T('citizenLabel')+'<br>'+T('scoreLabel')+': '+G.score;
   document.getElementById('ocPrevRow').innerHTML=
-    '<div>좀비 <span>'+next.zom+'</span></div>'+
-    '<div>시민 <span>'+next.cit+'</span></div>'+
-    '<div>🚧 <span>'+next.barriers+'</span></div>'+
-    '<div>TIME <span>'+next.timer+'</span></div>';
+    '<div>'+T('zombieLabel')+' <span>'+(next.zom)+'</span></div>'+
+    '<div>'+T('citizenLabel')+' <span>'+(next.cit)+'</span></div>'+
+    '<div>'+T('speedLabel')+' <span>'+(next.zSpd<=4?T('fastLabel'):next.zSpd<=6?T('midLabel'):T('slowLabel'))+'</span></div>'+
+    '<div>🚧 <span>'+(next.barriers)+'</span></div>';
   document.getElementById('ocScore').textContent=T('scoreLabel')+': '+G.score;
-  document.getElementById('ocBtn').textContent=T('ocBtn');
   document.getElementById('ovClear').classList.remove('hidden');
 }
+
 function gameOver(){
   G.running=false;G.over=true;
+  stopBGM();
+  playSFX('gameover', 3.5);
   document.getElementById('ooSub').textContent=T('gameOverSub');
-  document.getElementById('ooScore').textContent='WAVE '+G.wave+' | '+T('scoreLabel')+': '+G.score;
+  document.getElementById('ooScore').textContent=
+    'WAVE '+G.wave+' | '+T('scoreLabel')+': '+G.score;
   document.getElementById('ovOver').classList.remove('hidden');
 }
+
+function showHow(){document.getElementById('ovHow').classList.remove('hidden')}
+function closeHow(){document.getElementById('ovHow').classList.add('hidden')}
+
 function hideAll(){
-  ['ovScenario','ovClear','ovWin','ovOver','ovPause'].forEach(function(id){
-    var el=document.getElementById(id);if(el)el.classList.add('hidden');
+  ['ovClear','ovWin','ovOver','ovScenario','ovPause'].forEach(function(id){
+    var el=document.getElementById(id);
+    if(el)el.classList.add('hidden');
   });
-  var bar=document.getElementById('sitBar');if(bar)bar.style.display='none';
+  var bar=document.getElementById('sitBar');
+  if(bar)bar.style.display='none';
   G_PAUSED=false;
-  var btn=document.getElementById('pauseBtn');if(btn)btn.textContent='II';
+  var btn=document.getElementById('pauseBtn');
+  if(btn)btn.textContent='⏸';
 }
 
 // ══════════════════════════════════════
@@ -1313,7 +1823,8 @@ function shuffle(a){
 }
 
 // BOOT
-applyLang();resize();
+applyLang();
+resize();
 </script>
 </body>
 </html>
