@@ -1241,6 +1241,15 @@ function render(){
       ctx.fillRect(cit.c*TILE+2,cit.r*TILE+1,TILE-4,5);
       ctx.fillStyle='#ff2222';
       ctx.fillRect(cit.c*TILE+2,cit.r*TILE+1,Math.floor((TILE-4)*pct),5);
+      // 깜빡이는 💉 아이콘 (해독 가능 범위 힌트)
+      if(cit.infTimer<=40&&Math.floor(Date.now()/350)%2===0){
+        ctx.save();
+        ctx.shadowColor='#39ff14';ctx.shadowBlur=10;
+        ctx.font=Math.floor(TILE*0.62)+'px serif';
+        ctx.textAlign='center';ctx.textBaseline='bottom';
+        ctx.fillText('💉',(cit.c+0.5)*TILE, cit.r*TILE-1);
+        ctx.restore();
+      }
     } else {
       // 일반 시민 배경 (파란 안내)
       ctx.fillStyle='rgba(56,189,248,0.15)';
@@ -1325,14 +1334,14 @@ function render(){
     ctx.save();ctx.globalAlpha=f.life/50;
     ctx.fillStyle=f.color||'#ffff00';
     ctx.strokeStyle='#000';ctx.lineWidth=2;
-    ctx.font='bold 9px "Press Start 2P",monospace';ctx.textAlign='center';
+    ctx.font='bold '+(f.size||9)+'px "Press Start 2P",monospace';ctx.textAlign='center';
     ctx.strokeText(f.text,f.x,f.y);ctx.fillText(f.text,f.x,f.y);
     ctx.restore();
   });
 }
 
-function float(r,c,text,color){
-  floats.push({x:(c+.5)*TILE,y:r*TILE,text:text,life:50,color:color||'#ffff00'});
+function float(r,c,text,color,size){
+  floats.push({x:(c+.5)*TILE,y:r*TILE,text:text,life:50,color:color||'#ffff00',size:size||9});
 }
 
 // ══════════════════════════════════════
@@ -1421,7 +1430,19 @@ function stepRescue(){
 
 function tryRescue(){
   if(!G.running||!G.player)return;
-  var p=G.player,dirs=[[0,0],[-1,0],[1,0],[0,-1],[0,1]];
+  var p=G.player;
+  // 우선순위 1: 3칸 이내 감염 시민 해독 (infTimer≤40인 초기 감염만)
+  var bestInf=null,bestInfD=9999;
+  for(var ci=0;ci<G.citizens.length;ci++){
+    var cit=G.citizens[ci];
+    if(!cit.rescued&&cit.infected&&cit.infTimer<=40){
+      var d=Math.abs(cit.r-p.r)+Math.abs(cit.c-p.c);
+      if(d<=3&&d<bestInfD){bestInfD=d;bestInf=cit;}
+    }
+  }
+  if(bestInf){cureCitizen(bestInf);return;}
+  // 우선순위 2: 1칸 이내 일반 시민 구출
+  var dirs=[[0,0],[-1,0],[1,0],[0,-1],[0,1]];
   for(var di=0;di<dirs.length;di++){
     var tr=p.r+dirs[di][0],tc=p.c+dirs[di][1];
     for(var ci=0;ci<G.citizens.length;ci++){
@@ -1449,6 +1470,31 @@ function recruitCitizen(cit){
   }
   updateHUD();
 }
+function cureCitizen(cit){
+  if(G.followers.length>=MAX_FOLLOWERS){
+    bubble(T('bubFull'),G.player.r,G.player.c);return;
+  }
+  cit.infected=false;cit.infTimer=0;
+  cit.rescued=true;cit.immune=true;
+  G.followers.push({r:cit.r,c:cit.c,id:cit.id});
+  G.score+=30;
+  playSFX('rescue',2);
+  bubble('💉 해독 성공!',cit.r,cit.c);
+  float(cit.r,cit.c,'💉 CURED! +30','#39ff14',13);
+  // 3초 안내 메시지
+  var bar=document.getElementById('sitBar');
+  var wconf=WAVES[G.wave-1];
+  bar.innerHTML='<span style="color:#39ff14">💉 해독 성공!</span> 감염 초기에 히어로가 접촉하면 시민을 살릴 수 있습니다!';
+  bar.style.display='block';
+  if(sitTimer)clearTimeout(sitTimer);
+  sitTimer=setTimeout(function(){bar.style.display='none';},3000);
+  if(G.followers.length>=MAX_FOLLOWERS){
+    bubble(T('bubFull'),G.player.r,G.player.c);
+    float(G.player.r,G.player.c,'🏠 →','#fbbf24');
+  }
+  updateHUD();
+}
+
 function enterShelter(){
   var cnt=G.followers.length;
   G.rescued+=cnt;G.score+=cnt*40+80;
@@ -1586,6 +1632,15 @@ function updateZombies(){
     });
     if(cit.infected){
       cit.infTimer++;
+      // 감염 초기(infTimer≤40): 히어로를 향해 천천히 이동 (16틱마다)
+      if(cit.infTimer<=40&&G.player){
+        if(!cit.moveTick)cit.moveTick=0;
+        cit.moveTick++;
+        if(cit.moveTick>=16){
+          cit.moveTick=0;
+          moveToward(cit,G.player);
+        }
+      }
       if(cit.infTimer>=60){
         // 완전 좀비화
         G.citizens=G.citizens.filter(function(c){return c.id!==cit.id});
